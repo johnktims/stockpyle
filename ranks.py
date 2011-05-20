@@ -135,10 +135,10 @@ def main():
             ii = 0
             for row in allRows:
                 timeVector.append( ii )		#make this based on row[1], (date entry)
-                openVector.append( row[3] )
-                highVector.append( row[4] )
-                lowVector.append( row[5] )
-                closeVector.append( row[6] )
+                openVector.append( row['open'] )
+                highVector.append( row['high'] )
+                lowVector.append( row['low'] )
+                closeVector.append( row['close'] )
                 ii = ii +1
 
             print [symbol, expectedRatioGain(timeVector, openVector), expectedRatioGain(timeVector, highVector), expectedRatioGain(timeVector, lowVector), expectedRatioGain(timeVector, closeVector)]
