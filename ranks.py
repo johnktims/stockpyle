@@ -5,6 +5,13 @@
 #y is a vector of real values, as large as x, where each entry is the 
 #    sample value at the corresponding x time
 
+import urllib2
+import sqlite3
+import gzip
+import csv
+import os
+import io
+
 
 
 #finds the slope and y-intercept of a line through 
@@ -89,35 +96,45 @@ def expectedRatioGain( x, y ):
 #################################################################################################
 
 
+#def findTopRanker( conn ):
+#    cur = conn.cursor()
+#    cur.execute( "SELECT * from quotes" )
+#
+    #(`symbol`, `date`, `open`, `high`, `low`, `close`, `volume`, `adj_close`)
+#
+    #for ii in range(0,10):
+    #    quotes = cur.fetchone()
+    #    print quotes
+    #    print quotes[1]
+#
+#    for row in rows:
+        
 
-#something a bit different
-def somethingExotic( x, y ):
-    s = len(x)			#assumes x and y are the same size
-    halfS = s/2
+def main():
+    DATA_DIR = 'data'
+    DATA_DB = 'data.db'
 
-    firstHalf_x = x[0:halfS]
-    firstHalf_y = y[0:halfS]
-    secondHalf_x = x[halfS+1:s]
-    secondHalf_y = y[halfS+1:s]
+    conn = sqlite3.connect(DATA_DIR + '/' + DATA_DB)
+    cur = conn.cursor()
+
+    #(`symbol`, `date`, `open`, `high`, `low`, `close`, `volume`, `adj_close`)
+    f = open('data/sp500_18_may_2011.csv').read()
+    reader = csv.reader(f.split(os.linesep))
+    for company in reader:
+        if len(company) > 0
+            symbol = company[0]
+            cur.execute( "SELECT * FROM `quotes` WHERE `symbol` = ? AND `date` > DATE('now','-30 days') ORDER BY `date` DESC", (symbol,) )
+            allRows = cur.fetchall()
+
+            #for row in allRows:
+           
 
 
-    
-#################################################################################################
-## END 
-#################################################################################################
+    #print allRows
 
-x_pass = range(0,500)
-y_pass = []
-#for xVal in x_pass:
-for ii in range(0,len(x_pass)):
-    x_pass[ii] = x_pass[ii] / 10.0
-    xVal = x_pass[ii]
-    y_pass.append( 3.2*xVal + 1.8 )
 
-#print y_pass
-y_pass[len(y_pass)-1] = y_pass[len(y_pass)-1] + 2;
 
-x = expectedRatioGain( x_pass, y_pass )
-print x
 
+if __name__ == '__main__':
+    main()
 
