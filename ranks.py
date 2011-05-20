@@ -121,13 +121,27 @@ def main():
     f = open('data/sp500_18_may_2011.csv').read()
     reader = csv.reader(f.split(os.linesep))
     for company in reader:
-        if len(company) > 0
+        if len(company) > 0:
             symbol = company[0]
             cur.execute( "SELECT * FROM `quotes` WHERE `symbol` = ? AND `date` > DATE('now','-30 days') ORDER BY `date` DESC", (symbol,) )
             allRows = cur.fetchall()
 
-            #for row in allRows:
-           
+            timeVector = []
+            openVector = []
+            highVector = []
+            lowVector = []
+            closeVector = []
+            ii = 0
+            for row in allRows:
+                timeVector.append( ii )		#make this based on row[1], (date entry)
+                openVector.append( row[3] )
+                highVector.append( row[4] )
+                lowVector.append( row[5] )
+                closeVector.append( row[6] )
+                ii = ii +1
+
+            print [symbol, expectedRatioGain(timeVector, openVector), expectedRatioGain(timeVector, highVector), expectedRatioGain(timeVector, lowVector), expectedRatioGain(timeVector, closeVector)]
+
 
 
     #print allRows
