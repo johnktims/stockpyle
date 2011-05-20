@@ -115,6 +115,7 @@ def main():
     DATA_DB = 'data.db'
 
     conn = sqlite3.connect(DATA_DIR + '/' + DATA_DB)
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
     #(`symbol`, `date`, `open`, `high`, `low`, `close`, `volume`, `adj_close`)
