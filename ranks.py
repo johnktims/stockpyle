@@ -5,14 +5,7 @@
 #y is a vector of real values, as large as x, where each entry is the 
 #    sample value at the corresponding x time
 
-import urllib2
 import sqlite3
-import gzip
-import csv
-import os
-import io
-
-
 
 #finds the slope and y-intercept of a line through 
 #the data that minimizes the sum of the squared errors
@@ -57,7 +50,7 @@ def linearRegression( x, y ):
 
 
 
-#does basic linear regression and retrns the slope as the score
+#does basic linear regression and returns the slope as the score
 def slopeRank( x, y ):
     r = linearRegression( x, y )
     return r[0]
@@ -108,46 +101,55 @@ def expectedRatioGain( x, y ):
     #    print quotes[1]
 #
 #    for row in rows:
-        
+
 
 def main():
-    DATA_DIR = 'data'
-    DATA_DB = 'data.db'
-
-    conn = sqlite3.connect(DATA_DIR + '/' + DATA_DB)
+    conn = sqlite3.connect('data/data.db')
     conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
 
-    #(`symbol`, `date`, `open`, `high`, `low`, `close`, `volume`, `adj_close`)
-    f = open('data/sp500_18_may_2011.csv').read()
-    reader = csv.reader(f.split(os.linesep))
-    for company in reader:
-        if len(company) > 0:
-            symbol = company[0]
-            cur.execute( "SELECT * FROM `quotes` WHERE `symbol` = ? AND `date` > DATE('now','-30 days') ORDER BY `date` DESC", (symbol,) )
-            allRows = cur.fetchall()
+    symb_sql = '''
+        SELECT `symbol`
+        FROM `symbols`
+    '''
+    symb_cur = conn.cursor()
+    symb_cur.execute(symb_sql)
 
-            timeVector = []
-            openVector = []
-            highVector = []
-            lowVector = []
-            closeVector = []
-            ii = 0
-            for row in allRows:
-                timeVector.append( ii )		#make this based on row[1], (date entry)
-                openVector.append( row['open'] )
-                highVector.append( row['high'] )
-                lowVector.append( row['low'] )
-                closeVector.append( row['close'] )
-                ii = ii +1
+    comp_sql = '''
+        SELECT `symbol`, `date`, `open`,
+               `high`, `low`, `close`,
+               `volume`, `adj_close`
+        FROM `quotes`
+        WHERE `symbol` = ? AND
+              `date` > DATE('now','-30 days')
+        ORDER BY `date` DESC
+    '''
+    comp_cur = conn.cursor()
 
-            print [symbol, expectedRatioGain(timeVector, openVector), expectedRatioGain(timeVector, highVector), expectedRatioGain(timeVector, lowVector), expectedRatioGain(timeVector, closeVector)]
+    for company in symb_cur:
+        comp_cur.execute(comp_sql, tuple(company))
 
+        timeVector = []
+        openVector = []
+        highVector = []
+        lowVector = []
+        closeVector = []
+        ii = 0
 
+        for row in comp_cur:
+            #make this based on row[1], (date entry)
+            timeVector.append(ii)
 
-    #print allRows
+            openVector.append(row['open'])
+            highVector.append(row['high'])
+            lowVector.append(row['low'])
+            closeVector.append(row['close'])
+            ii += 1
 
-
+        print [company[0],
+            expectedRatioGain(timeVector, openVector),
+            expectedRatioGain(timeVector, highVector),
+            expectedRatioGain(timeVector, lowVector),
+            expectedRatioGain(timeVector, closeVector)]
 
 
 if __name__ == '__main__':
