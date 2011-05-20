@@ -6,11 +6,13 @@
 #    sample value at the corresponding x time
 
 import sqlite3
+import scipy
+from scipy import stats
 
 #finds the slope and y-intercept of a line through 
 #the data that minimizes the sum of the squared errors
 def linearRegression( x, y ):
-
+    '''
     n = len( y );
 
     S_x = sum( x );
@@ -44,6 +46,9 @@ def linearRegression( x, y ):
     #print alpha_hat
 
     return [beta_hat, alpha_hat]
+    '''
+    return stats.linregress(x,y)
+
 #################################################################################################
 ## END linearRegression(...)
 #################################################################################################
@@ -115,7 +120,7 @@ def main():
     symb_cur.execute(symb_sql)
 
     comp_sql = '''
-        SELECT `symbol`, `date`, `open`,
+        SELECT `date`, `open`,
                `high`, `low`, `close`,
                `volume`, `adj_close`
         FROM `quotes`
@@ -128,10 +133,10 @@ def main():
     for company in symb_cur:
         comp_cur.execute(comp_sql, tuple(company))
 
-        timeVector = []
-        openVector = []
-        highVector = []
-        lowVector = []
+        timeVector  = []
+        openVector  = []
+        highVector  = []
+        lowVector   = []
         closeVector = []
         ii = 0
 
@@ -144,6 +149,12 @@ def main():
             lowVector.append(row['low'])
             closeVector.append(row['close'])
             ii += 1
+
+        timeVector  = scipy.array(timeVector)
+        openVector  = scipy.array(openVector)
+        highVector  = scipy.array(highVector)
+        lowVector   = scipy.array(lowVector)
+        closeVector = scipy.array(closeVector)
 
         print [company[0],
             expectedRatioGain(timeVector, openVector),
