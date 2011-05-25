@@ -5,7 +5,7 @@
 #y is a vector of real values, as large as x, where each entry is the 
 #    sample value at the corresponding x time
 
-import sqlite3
+
 import scipy
 from scipy import stats
 
@@ -94,75 +94,7 @@ def expectedRatioGain( x, y ):
 #################################################################################################
 
 
-#def findTopRanker( conn ):
-#    cur = conn.cursor()
-#    cur.execute( "SELECT * from quotes" )
-#
-    #(`symbol`, `date`, `open`, `high`, `low`, `close`, `volume`, `adj_close`)
-#
-    #for ii in range(0,10):
-    #    quotes = cur.fetchone()
-    #    print quotes
-    #    print quotes[1]
-#
-#    for row in rows:
 
 
-def main():
-    conn = sqlite3.connect('data/data.db')
-    conn.row_factory = sqlite3.Row
 
-    symb_sql = '''
-        SELECT `symbol`
-        FROM `symbols`
-    '''
-    symb_cur = conn.cursor()
-    symb_cur.execute(symb_sql)
-
-    comp_sql = '''
-        SELECT `date`, `open`,
-               `high`, `low`, `close`,
-               `volume`, `adj_close`
-        FROM `quotes`
-        WHERE `symbol` = ? AND
-              `date` > DATE('now','-30 days')
-        ORDER BY `date` DESC
-    '''
-    comp_cur = conn.cursor()
-
-    for company in symb_cur:
-        comp_cur.execute(comp_sql, tuple(company))
-
-        timeVector  = []
-        openVector  = []
-        highVector  = []
-        lowVector   = []
-        closeVector = []
-        ii = 0
-
-        for row in comp_cur:
-            #make this based on row[1], (date entry)
-            timeVector.append(ii)
-
-            openVector.append(row['open'])
-            highVector.append(row['high'])
-            lowVector.append(row['low'])
-            closeVector.append(row['close'])
-            ii += 1
-
-        timeVector  = scipy.array(timeVector)
-        openVector  = scipy.array(openVector)
-        highVector  = scipy.array(highVector)
-        lowVector   = scipy.array(lowVector)
-        closeVector = scipy.array(closeVector)
-
-        print [company[0],
-            expectedRatioGain(timeVector, openVector),
-            expectedRatioGain(timeVector, highVector),
-            expectedRatioGain(timeVector, lowVector),
-            expectedRatioGain(timeVector, closeVector)]
-
-
-if __name__ == '__main__':
-    main()
 
