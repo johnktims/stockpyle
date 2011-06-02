@@ -114,17 +114,25 @@ def main():
 
             #find the minimum absolute value difference between 
             #the actual and predicted over the next few days
-            error_term = 0.0
+            #error_term = 0.0
             #for each of the next few days
-            allActuals = []
+            #allActuals = []
+            allDifference = []					#may want these 2 vectors for simple stats... say variance
+            allDifference_ABS = []
             for futureIndex in range(0,len(futureValues)):
                 actual_percentage_up = (futureValues[futureIndex] - currentValue) / currentValue	#at day index 'futureIndex'
-                possible_replacement = abs( predicted_up_value - actual_percentage_up )			#possible error replacement
-                allActuals.append( actual_percentage_up )
-                if( (futureIndex == 0) or (possible_replacement < error_term) ):
-                    error_term = possible_replacement
+                newDiff = predicted_up_value - actual_percentage_up
+                allDifference.append( newDiff )
+                allDifference_ABS.append( abs(newDiff) )
+                #possible_replacement = abs( newDiff )							#possible error replacement
+                #allActuals.append( actual_percentage_up )
+                #if( (futureIndex == 0) or (possible_replacement < error_term) ):
+                #    error_term = possible_replacement
 
-            print predicted_up_value, " ", allActuals, " ", error_term
+            error_term = min( allDifference_ABS )							#how close did it get, absolutely
+                
+
+            #print predicted_up_value, " ", allActuals, " ", error_term
 
             symbolError = symbolError + error_term
 
