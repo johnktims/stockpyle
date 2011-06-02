@@ -65,7 +65,8 @@ def main():
         avgS = (s1+s2+s3+s4) / 4.0
 
 
-        symbolScores = [companyIndex,company[0],s1,s2,s3,s4,avgS, max([s1,s2,s3,s4])]
+        #symbolScores = [companyIndex,company[0],s1,s2,s3,s4,avgS, max([s1,s2,s3,s4])]
+        symbolScores = [companyIndex,company[0],s1,s4,avgS]
         print symbolScores
         allScores.append( symbolScores )
 
@@ -76,7 +77,9 @@ def main():
         print 'index ' + str(iii)
         #allScores.sort(lambda x, y: cmp(x[iii],y[iii]))
         allScores.sort(lambda x, y: cmp(y[iii],x[iii]))
-        print allScores
+        #print allScores
+        for asi in range(0, len(allScores)):
+            print allScores[asi]
 
 
 

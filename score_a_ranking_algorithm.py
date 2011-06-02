@@ -24,7 +24,7 @@ def main():
     whole_history_size = 90	#pull this many days back
     slide_size = 5		#when picking windows... shift this much
     window_size = 30		#the history size presented to the ranking algorithm
-    max_own_window = 5		#maximum number of days that a purchase has to get to the predicted value (hold time)
+    max_own_window = 1		#maximum number of days that a purchase has to get to the predicted value (hold time)
 
 
     comp_sql = '''
@@ -114,13 +114,16 @@ def main():
             leftSide = leftSide + window_size
             numberOfSlides = numberOfSlides + 1
 
-        symbolError = symbolError / numberOfSlides							#expected value
+
+        #expected value of smallest distance between prediction and actual
+        symbolError = symbolError / numberOfSlides
         ####################################################################
 
         print company, ": ", symbolError
         allSymbolErrors.append( symbolError )
         overallError = overallError + symbolError
 
+    overallError = overallError / len(allSymbolErrors)
     print "allSymbolErrors: ", allSymbolErrors
     print "overallError: ", overallError
 
