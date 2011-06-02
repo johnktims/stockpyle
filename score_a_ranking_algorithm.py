@@ -24,7 +24,7 @@ def main():
     whole_history_size = 90	#pull this many days back
     slide_size = 5		#when picking windows... shift this much
     window_size = 30		#the history size presented to the ranking algorithm
-    max_own_window = 1		#maximum number of days that a purchase has to get to the predicted value (hold time)
+    max_own_window = 5		#maximum number of days that a purchase has to get to the predicted value (hold time)
 
 
     comp_sql = '''
@@ -103,15 +103,19 @@ def main():
             #the actual and predicted over the next few days
             error_term = 0.0
             #for each of the next few days
+            allActuals = []
             for futureIndex in range(0,len(futureValues)):
                 actual_percentage_up = (futureValues[futureIndex] - currentValue) / currentValue
                 possible_replacement = abs( predicted_up_value - actual_percentage_up )
+                allActuals.append( actual_percentage_up )
                 if( (futureIndex == 0) or (possible_replacement < error_term) ):
                     error_term = possible_replacement
 
+            print predicted_up_value, " ", allActuals, " ", error_term
+
             symbolError = symbolError + error_term
 
-            leftSide = leftSide + window_size
+            leftSide = leftSide + slide_size
             numberOfSlides = numberOfSlides + 1
 
 
