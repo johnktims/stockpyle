@@ -89,10 +89,11 @@ def main():
         numberOfSlides = 0
         while( leftSide < (whole_history_size - window_size - max_own_window) ):
             rightSide = leftSide + window_size	#inclusive...
+            currentTimeVector = timeVector[leftSide:(rightSide+1)]
             currentWindow = vectorOfInterest[leftSide:(rightSide+1)]
 
             #insert the algorithm function to test
-            predicted_up_value = expectedRatioGain(timeVector, currentWindow)
+            predicted_up_value = expectedRatioGain(currentTimeVector, currentWindow)
 
             #find the value closest to this prediction, within the next few days
             #and call their difference the error term
@@ -105,8 +106,8 @@ def main():
             #for each of the next few days
             allActuals = []
             for futureIndex in range(0,len(futureValues)):
-                actual_percentage_up = (futureValues[futureIndex] - currentValue) / currentValue
-                possible_replacement = abs( predicted_up_value - actual_percentage_up )
+                actual_percentage_up = (futureValues[futureIndex] - currentValue) / currentValue	#at day index 'futureIndex'
+                possible_replacement = abs( predicted_up_value - actual_percentage_up )			#possible error replacement
                 allActuals.append( actual_percentage_up )
                 if( (futureIndex == 0) or (possible_replacement < error_term) ):
                     error_term = possible_replacement
