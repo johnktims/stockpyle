@@ -92,7 +92,7 @@ def main():
             currentWindow = vectorOfInterest[leftSide:(rightSide+1)]
 
             #insert the algorithm function to test
-            predicted_up_value = expectedRatioGain(timeVector, vectorOfInterest)
+            predicted_up_value = expectedRatioGain(timeVector, currentWindow)
 
             #find the value closest to this prediction, within the next few days
             #and call their difference the error term
