@@ -80,6 +80,13 @@ def main():
         ####################################################################
 
 
+        #potential updates out of necesity
+        whole_history_size = min(len(timeVector), len(vectorOfInterest))	        #pull this many days back
+        #slide_size = 5		        						#when picking windows... shift this much
+        #window_size = 30								#the history size presented to the ranking algorithm
+        #max_own_window = 5								#maximum number of days that a purchase has to get to the predicted value (hold time)
+
+
 
         ####################################################################
         ## step 2: find this symbol's error term
@@ -99,6 +106,11 @@ def main():
             #and call their difference the error term
             futureValues = vectorOfInterest[(rightSide+1):(rightSide+1+max_own_window)]
             currentValue = currentWindow[len(currentWindow)-1]						#last element
+
+            #print "\n\n"
+            #print [leftSide, rightSide, len(timeVector), len(vectorOfInterest), len(currentTimeVector), len(currentWindow)]
+            #print "futureValues: ", futureValues
+            #print "\n\n"
 
             #find the minimum absolute value difference between 
             #the actual and predicted over the next few days
