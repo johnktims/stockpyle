@@ -4,18 +4,16 @@
 
 Node::Node()
 {
-	// just crappy defaults to mitigate seg fault possibility... 
-	//but still erronious (sp?)
-	nrt.leafBool = true;
-	nrt.goToLeftChild = true;
-	//nrt.partition
+	//(rememberedSplit.leftIndexes).clear();
+	//(rememberedSplit.rightIndexes).clear();
 }
 
 
 TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 {
 	TrainingReturnType trt;
-	(trt.partition).clear();
+	(trt.leftIndexes).clear();
+	(trt.rightIndexes).clear();
 
 	if( isPure( dm ) )
 	{
@@ -40,6 +38,7 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 		//see if it is alreay contained...
 		bool contained = false;
 		for(int ii = 0; (!contained) && (ii < (int)testIndexes.size()); ii++)
+			//contained |= (aTestIndex == testIndexes[ii]);	//or equal faster?
 			contained = (aTestIndex == testIndexes[ii]);
 		
 		if( !contained )
@@ -56,21 +55,28 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 		
 		SplitPoint sp = findPartition( dm, testIndex );
 		if( sp.score > bestSplit.score )
-		{
 			bestSplit = sp;
-		}
+		
 	}//END for(all test indexes)
 
 
 	
-	leftMean, leftVariance, rightMean, rightVariance
+	rememberedSplit = bestSplit;
+	(rememberedSplit.leftIndexes).clear();
+	(rememberedSplit.rightIndexes).clear();
 
 
-	TrainingReturnType trt;
+
+	//TrainingReturnType trt;
 	trt.leafBool = false;
-	int numberOfFeatureVectors = dm.vectorCount();
-	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
-		(trt.partition).push_back(  )
+	for(int vectorIndex = 0; vectorIndex < (int)(bestSplit.leftIndexes).size(); vectorIndex++)
+			(trt.leftIndexes).push_back( (bestSplit.leftIndexes)[vectorIndex] );
+
+	for(int vectorIndex = 0; vectorIndex < (int)(bestSplit.rightIndexes).size(); vectorIndex++)
+			(trt.rightIndexes).push_back( (bestSplit.rightIndexes)[vectorIndex] );
+
+	return trt;
+	
 }//END presentTrainingData()
 
 bool Node::isPure( DataMatrix dm )
@@ -78,7 +84,8 @@ bool Node::isPure( DataMatrix dm )
 	int numberOfFeatureVectors = dm.vectorCount();
 
 	//will be slightly off foe small values of 'numberOfFeatureVectors' (b/c N-1)
-	double mean = 0.0;
+	double sum_x = 0.0;
+	double sum_x_squared = 0.0;
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
 	{
 		double nextLabel = (dm.getFeatureVector(vectorIndex)).getLabel();
@@ -118,6 +125,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		newElement.l = (dm.getFeatureVector(vectorIndex)).getLabel();
 
 		cutOutColumn.push_back( newElement );
+
 
 		if( vectorIndex == 0 )
 		{
@@ -177,7 +185,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 	
 	//try all split locations... and save best one
 	//this can be optimized... no need to rebuild entire distribution each time
-	double bestSplit_score = -1.0;
+	double bestSplit_score = -1;
 	int bestSplit_numberOnLeft = -1;
 	while( (int)rightSide.size() > 0 )
 	{
@@ -217,49 +225,75 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		}
 
 
-		//sign issues???
-		double KB_1 = 0.0;
-		double KB_2 = 0.0;
-		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
+		//check defined criteria
+		//for all i: (P(i)>0) -> (Q(i)>0)
+		bool zeroHeightRequirementSatisfied = true;
+		for(int binIndex = 0; zeroHeightRequirementSatisfied && (binIndex < desiredNumberOfBins); binIndex++)
 		{
-			double rat_1 = leftDistribution[binIndex] / rightDistribution[binIndex];
-			if( rat_1 > 0.0 )
-				KB_1 += leftDistribution[binIndex] * (log(rat_1) / log(2.0));
+			bool atLeastOneZero = (leftDistribution[binIndex]*rightDistribution[binIndex] == 0.0);
+			bool bothZero = (leftDistribution[binIndex]+rightDistribution[binIndex] == 0.0);
 
-			double rat_2 = rightDistribution[binIndex] / leftDistribution[binIndex];
-			if( rat_2 > 0.0 )
-				KB_2 += rightDistribution[binIndex] * (log(rat_2) / log(2.0));
-		}//END for(binIndex)
-
-		double thisSplitsScore = 0.5*(KB_1 + KB_2);
-
-
-		//initilize or update 'bests'
-		if( (bestSplit_numberOnLeft == -1) || (thisSplitsScore > bestSplit_score) )
-		{
-			bestSplit_numberOnLeft = (int)leftSide.size();
-			bestSplit_score = thisSplitsScore;
+			if( atLeastOneZero && bothZero )
+				zeroHeightRequirementSatisfied = false;
 		}
+
+		if( zeroHeightRequirementSatisfied )
+		{
+			//sign issues???
+			double KB_1 = 0.0;
+			double KB_2 = 0.0;
+			for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
+			{
+				double rat_1 = leftDistribution[binIndex] / rightDistribution[binIndex];
+				if( rat_1 > 0.0 )
+					KB_1 += leftDistribution[binIndex] * (log(rat_1) / log(2.0));
+
+				double rat_2 = rightDistribution[binIndex] / leftDistribution[binIndex];
+				if( rat_2 > 0.0 )
+					KB_2 += rightDistribution[binIndex] * (log(rat_2) / log(2.0));
+			}//END for(binIndex)
+
+			double thisSplitsScore = 0.5*(KB_1 + KB_2);
+
+
+			//initilize or update 'bests'
+			if( (bestSplit_numberOnLeft == -1) || (thisSplitsScore > bestSplit_score) )
+			{
+				bestSplit_numberOnLeft = (int)leftSide.size();
+				bestSplit_score = thisSplitsScore;
+			}
+		}//if( zeroHeightRequirementSatisfied )
 
 	}//END for(splitLocation)
 
 
 	SplitPoint ret;
 	ret.score = bestSplit_score;
-	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
-		(ret.partition).push_back( false );
+	//for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
+	//	(ret.partition).push_back( false );
 	
 	//first 'bestSplit_numberOnLeft' in 'cutOutColumn' go to the left
-	for(int kk = 0; kk < bestSplit_numberOnLeft; kk++)
+	//for(int kk = 0; kk < bestSplit_numberOnLeft; kk++)
+	//{
+	//	int indexThatGoesToLeft = cutOutColumn[kk].i;
+	//	//(ret.partition)[indexThatGoesToLeft] = true;
+	//}
+
+	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
 	{
-		int indexThatGoesToLeft = cutOutColumn[kk];
-		(ret.partition)[indexThatGoesToLeft] = true;
-	}
+		int orig_index = cutOutColumn[vectorIndex].i;
+
+		if( vectorIndex < bestSplit_numberOnLeft )
+			(ret.leftIndexes).push_back( orig_index );
+
+		else
+			(ret.rightIndexes).push_back( orig_index );
+	}//END for(vectorIndex)
 
 	double sum_x_l = 0.0;
 	double sum_x_r = 0.0;
 	double sum_x_l_sq = 0.0;
-	double sum_x_l_sq = 0.0;
+	double sum_x_r_sq = 0.0;
 	int count_l = 0;
 	int count_r = 0;
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
@@ -283,10 +317,10 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 	ret.featInd = featureIndex;
 
 	ret.lm = sum_x_l / count_l;
-	ret.lv = 
+	ret.lv = (sum_x_l_sq / count_l) - (ret.lm*ret.lm);
 
 	ret.rm = sum_x_r / count_r;
-	ret.rv
+	ret.rv = (sum_x_r_sq / count_r) - (ret.rm*ret.rm);
 
 	return ret;
 }

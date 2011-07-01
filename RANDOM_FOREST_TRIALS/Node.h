@@ -19,13 +19,18 @@
 struct TrainingReturnType
 {
 	bool leafBool;
-	std::vector<bool> partition;
+	//std::vector<bool> partition;
+	std::vector<int> leftIndexes;
+	std::vector<int> rightIndexes;
 };
 
 
 struct SplitPoint
 {
-	std::vector<bool> partition;
+	//std::vector<bool> partition;
+	std::vector<int> leftIndexes;
+	std::vector<int> rightIndexes;
+
 	double score;			//to maximize
 	int featInd;
 
@@ -48,11 +53,9 @@ class Node
 		Node();
 		TrainingReturnType presentTrainingData( DataMatrix dm, int ss );
 
-		NodeReturnType getNodeReturnType();
-
 
 	private:
-		NodeReturnType nrt;
+		SplitPoint rememberedSplit;	//partition not remembered...
 
 		bool isPure( DataMatrix dm );
 
@@ -60,8 +63,10 @@ class Node
 
 
 		double representativeMean, representativeVariance;	//at this node...
-		double leftMean, leftVariance, rightMean, rightVariance;
 
+
+
+		//double leftMean, leftVariance, rightMean, rightVariance;
 		//bool FeatureAndIndexSorter(FeatureAndIndex const& lhs, FeatureAndIndex const& rhs);
 };
 
