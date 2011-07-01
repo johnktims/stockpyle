@@ -5,7 +5,7 @@ DataMatrix::DataMatrix()
 {
 }
 
-void DataMatrix::addFeatureMatrix( FeatureVector fv )
+void DataMatrix::addFeatureVector( FeatureVector fv )
 {
 	if( (vectorCount() == 0) )
 		matrix.push_back( fv );
@@ -14,7 +14,7 @@ void DataMatrix::addFeatureMatrix( FeatureVector fv )
 		matrix.push_back( fv );
 	
 	else
-		std::cout << "DataMatrix::addFeatureMatrix() ~~~ dimensionality error\n\n" << std::flush;
+		std::cout << "DataMatrix::addFeatureVector() ~~~ dimensionality error\n\n" << std::flush;
 }
 
 FeatureVector DataMatrix::getFeatureVector( int index )

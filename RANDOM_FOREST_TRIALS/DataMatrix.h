@@ -9,7 +9,7 @@ class DataMatrix
 	public:
 		DataMatrix();
 
-		void addFeatureMatrix( FeatureVector fv );
+		void addFeatureVector( FeatureVector fv );
 		FeatureVector getFeatureVector( int index );
 
 		int vectorCount();
