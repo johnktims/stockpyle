@@ -7,46 +7,12 @@ Tree::Tree( std::string n )
 }
 
 
-#define	USE_BOOTSTRAPPING	1
-#define	BOOTSTRAP_RATIO		(0.6)
-#define	USE_REPLACEMENT		1
-TrainingReturnType Tree::presentTrainingData( DataMatrix dm_passed, int ss )
+
+void Tree::presentTrainingData( DataMatrix dm, int ss )
 {
 	srand( ss );
-
-
-	DataMatrix dm_toUse;
-	#if USE_BOOTSTRAPPING == 0
-	dm_toUse = dm_passed;	//copy correctly???
-	#endif
-
-	#if USE_BOOTSTRAPPING == 0
-	int numberToChooseFrom = dm_passed.vectorCount();
-	int desiredNumberOfVectors = floor(numberToChooseFrom*BOOTSTRAP_RATIO);
-
-	std::vector<int> indexesAddedAlready;
-	while( dm_toUse.vectorCount() < desiredNumberOfVectors )
-	{
-		int indexToAdd = rand() % numberToChooseFrom;
-
-		bool useThisIndex = true;
-		#if USE_REPLACEMENT == 0
-		for(int iii = 0; useThisIndex && (iii < (int)indexesAddedAlready.size()); iii++)
-			useThisIndex = (indexToAdd == indexesAddedAlready[iii]);
-		#endif
-
-		if( useThisIndex )
-			indexesAddedAlready.push_back( indexToAdd );
-	}
-
-	for(int iii = 0; useThisIndex && (iii < (int)indexesAddedAlready.size()); iii++)
-	{
-		dm_toUse.addFeatureVector( dm_passed.getFeatureVector( indexesAddedAlready[iii] ) );
-	}
-	#endif
-
 	
-	rootIndex = addNode( dm_toUse, rand() );
+	rootIndex = addNode( dm, rand() );
 }
 
 int Tree::addNode( DataMatrix dm, int ss )

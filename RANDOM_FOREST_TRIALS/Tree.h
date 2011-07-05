@@ -13,16 +13,14 @@
 #include "Node.h"
 
 
-#define	USE_BOOTSTRAPPING	1
-#define	BOOTSTRAP_RATIO		(0.6)
-#define	USE_REPLACEMENT		1
+
 
 
 class Tree
 {
 	public:
 		Tree( std::string n );
-		TrainingReturnType presentTrainingData( DataMatrix dm, int ss );
+		void presentTrainingData( DataMatrix dm, int ss );
 
 
 	private:
