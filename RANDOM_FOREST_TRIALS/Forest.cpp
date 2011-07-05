@@ -12,6 +12,8 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 
 	for(int treeIndex = 0; treeIndex < TREE_COUNT; treeIndex++)
 	{
+		std::cout << "building data matrix for treeIndex=" << treeIndex << "\n" << std::flush;
+
 		////////////////////////////////////////////////////////////////////////////////
 		DataMatrix dm_toUse;
 		std::vector<int> indexesToAdd;
@@ -29,7 +31,7 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 		int numberToChooseFrom = dm_passed.vectorCount();
 		int desiredNumberOfVectors = floor(numberToChooseFrom*BOOTSTRAP_RATIO);
 
-		while( dm_toUse.vectorCount() < desiredNumberOfVectors )
+		while( indexesToAdd.size() < desiredNumberOfVectors )
 		{
 			int indexToAdd = rand() % numberToChooseFrom;
 
@@ -54,6 +56,7 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 		treeName << "TREE_" << treeIndex;
 		Tree tt( treeName.str() );
 
+		std::cout << "TRAINING treeIndex=" << treeIndex << "\n" << std::flush;
 		allTrees.push_back( tt );
 		allTrees[allTrees.size()-1].presentTrainingData( dm_toUse, rand() );
 

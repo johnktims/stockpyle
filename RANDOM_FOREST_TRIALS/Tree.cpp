@@ -17,6 +17,7 @@ void Tree::presentTrainingData( DataMatrix dm, int ss )
 
 int Tree::addNode( DataMatrix dm, int ss )
 {
+	std::cout << "\tadding a node to tree... dm.vectorCount()=" << dm.vectorCount() << "\n" << std::flush;
 	int ret = allNodes.size();
 
 	Node nn;
@@ -29,6 +30,7 @@ int Tree::addNode( DataMatrix dm, int ss )
 		leftChildren.push_back(-1);
 		rightChildren.push_back(-1);
 		isLeaf.push_back(true);
+		std::cout << "\t\tLEAF\n" << std::flush;
 	}
 
 	else
@@ -54,6 +56,8 @@ int Tree::addNode( DataMatrix dm, int ss )
 		leftChildren.push_back( lci );
 		rightChildren.push_back( rci );
 		isLeaf.push_back(false);
+
+		std::cout << "\t\t{" << lci << "," << rci << "\n" << std::flush;
 	}
 
 	return ret;

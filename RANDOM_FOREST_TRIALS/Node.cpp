@@ -45,7 +45,7 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 			testIndexes.push_back( aTestIndex );
 	}//END while( testIndexes is too small )
 
-
+	std::cout << "HERE 48\n\n" << std::flush;
 	//go through all test indexes...
 	SplitPoint bestSplit;
 	bestSplit.score = -1.0;
@@ -58,7 +58,7 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 			bestSplit = sp;
 		
 	}//END for(all test indexes)
-
+	std::cout << "HERE 61\n\n" << std::flush;
 
 	
 	rememberedSplit = bestSplit;
@@ -82,6 +82,9 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 bool Node::isPure( DataMatrix dm )
 {
 	int numberOfFeatureVectors = dm.vectorCount();
+
+	if( numberOfFeatureVectors <= MINIMUM_NUMBER_OF_VECTORS )
+		return true;
 
 	//will be slightly off foe small values of 'numberOfFeatureVectors' (b/c N-1)
 	double sum_x = 0.0;
@@ -109,6 +112,7 @@ bool Node::isPure( DataMatrix dm )
 //intentionally left unoptimized for now...
 SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 {
+	std::cout << "HERE 115\n\n" << std::flush;
 	int numberOfFeatureVectors = dm.vectorCount();
 
 
@@ -123,6 +127,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		newElement.i = vectorIndex;
 		newElement.f = (dm.getFeatureVector(vectorIndex)).getFeature(featureIndex);
 		newElement.l = (dm.getFeatureVector(vectorIndex)).getLabel();
+
 
 		cutOutColumn.push_back( newElement );
 
@@ -140,7 +145,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 			minimum_lab = newElement.l;
 
 	}//END for(vectorIndex)
-
+	std::cout << "HERE 147\n\n" << std::flush;
 	//std::sort(cutOutColumn.begin(), cutOutColumn.end(), &Node::FeatureAndIndexSorter);
 	//std::sort(cutOutColumn.begin(), cutOutColumn.end(), &FeatureAndIndexSorter);
 	
@@ -167,21 +172,24 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		}
 	}//END sort...
 
-
+	std::cout << "HERE 174\n\n" << std::flush;
 
 
 	std::deque<FeatureAndIndexAndLabel> leftSide, rightSide;
 	//copy everything after the first one into the rightSide
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
+	{
 		rightSide.push_back( cutOutColumn[vectorIndex] );
-	
+	}
+	std::cout << std::flush;
+
 
 	//define distribution bin size...
 
 	int desiredNumberOfBins = sqrt(numberOfFeatureVectors);
 	double binSize = (maximum_lab - minimum_lab) / desiredNumberOfBins;
 
-
+	std::cout << "HERE 188\n\n" << std::flush;
 	
 	//try all split locations... and save best one
 	//this can be optimized... no need to rebuild entire distribution each time
@@ -193,7 +201,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		FeatureAndIndexAndLabel mover = rightSide[0];
 		rightSide.pop_front();
 		leftSide.push_back( mover );
-
+		std::cout << "HERE 200\n\n" << std::flush;
 
 
 		//very much open for interpretation and change
@@ -207,23 +215,25 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 			leftDistribution.push_back( 0.0 );
 			rightDistribution.push_back( 0.0 );
 		}
-
+		std::cout << "HERE 214\n\n" << std::flush;
 
 		//build distributions
 		for(int i = 0; i < (int)leftSide.size(); i++)					//go through left side
 		{
 			double nextValue = leftSide[i].l;
-			int binIndex = floor( nextValue/binSize );				//right???
+			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
+			std::cout << "binIndex: " << binIndex << " " << nextValue << " " << binSize << " " << leftDistribution.size() << "\n\n" << std::flush;
 			leftDistribution[binIndex] += (1.0/(double)leftDistribution.size());	//for sum to 1 requirement
 		}
+		std::cout << "HERE 223\n\n" << std::flush;
 
 		for(int i = 0; i < (int)rightSide.size(); i++)					//go through right side
 		{
 			double nextValue = rightSide[i].l;
-			int binIndex = floor( nextValue/binSize );				//right???
+			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
 			rightDistribution[binIndex] += (1.0/(double)rightDistribution.size());	//for sum to 1 requirement
 		}
-
+		std::cout << "HERE 236\n\n" << std::flush;
 
 		//check defined criteria
 		//for all i: (P(i)>0) -> (Q(i)>0)
@@ -265,7 +275,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		}//if( zeroHeightRequirementSatisfied )
 
 	}//END for(splitLocation)
-
+	std::cout << "HERE 272\n\n" << std::flush;
 
 	SplitPoint ret;
 	ret.score = bestSplit_score;

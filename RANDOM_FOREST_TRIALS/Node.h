@@ -12,7 +12,8 @@
 
 
 //variance on labels
-#define	MAXIMUM_PURE_VARIANCE	0.001
+#define	MAXIMUM_PURE_VARIANCE		0.001
+#define	MINIMUM_NUMBER_OF_VECTORS	3
 
 
 
