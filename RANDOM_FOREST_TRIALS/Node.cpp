@@ -19,6 +19,8 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 	{
 		trt.leafBool = true;
 		//no need to build partition...
+
+		return trt;
 	}
 
 	srand( ss );
@@ -38,32 +40,27 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 		//see if it is alreay contained...
 		bool contained = false;
 		for(int ii = 0; (!contained) && (ii < (int)testIndexes.size()); ii++)
+		{
 			//contained |= (aTestIndex == testIndexes[ii]);	//or equal faster?
 			contained = (aTestIndex == testIndexes[ii]);
-		
+		}
+
 		if( !contained )
 			testIndexes.push_back( aTestIndex );
 	}//END while( testIndexes is too small )
 
-	std::cout << "HERE 48\n\n" << std::flush;
+
 	//go through all test indexes...
 	SplitPoint bestSplit;
-	bestSplit.score = -1.0;
 	for(int jj = 0; jj < numberOfFeaturesToTest; jj++)
 	{
 		int testIndex = testIndexes[jj];	//a column index into the data matrix...
 		
 		SplitPoint sp = findPartition( dm, testIndex );
-		if( sp.score > bestSplit.score )
-			bestSplit = sp;
+		if( (jj == 0 ) || (sp.score > bestSplit.score) )
+			bestSplit = sp;			//everything copied properly???
 		
 	}//END for(all test indexes)
-	std::cout << "HERE 61\n\n" << std::flush;
-
-	
-	rememberedSplit = bestSplit;
-	(rememberedSplit.leftIndexes).clear();
-	(rememberedSplit.rightIndexes).clear();
 
 
 
@@ -74,6 +71,16 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 
 	for(int vectorIndex = 0; vectorIndex < (int)(bestSplit.rightIndexes).size(); vectorIndex++)
 			(trt.rightIndexes).push_back( (bestSplit.rightIndexes)[vectorIndex] );
+
+
+
+	//too much room to save the partitions... 
+	//and not really useful for future classification...
+	//(that is if the saved items {mean and variance} are actually representative of the items here
+	(bestSplit.leftIndexes).clear();
+	(bestSplit.rightIndexes).clear();
+	rememberedSplit = bestSplit;
+
 
 	return trt;
 	
@@ -100,6 +107,8 @@ bool Node::isPure( DataMatrix dm )
 	//this is variance on the labels...
 	double variance = (sum_x_squared/numberOfFeatureVectors) - (mean*mean);
 
+
+	//if at this node... the items previously here had this distribution...
 	representativeMean = mean;
 	representativeVariance = variance;
 
@@ -110,9 +119,9 @@ bool Node::isPure( DataMatrix dm )
 
 //lots of room for optimization...
 //intentionally left unoptimized for now...
+//expects non zero span of labels presented...
 SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 {
-	std::cout << "HERE 115\n\n" << std::flush;
 	int numberOfFeatureVectors = dm.vectorCount();
 
 
@@ -145,11 +154,9 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 			minimum_lab = newElement.l;
 
 	}//END for(vectorIndex)
-	std::cout << "HERE 147\n\n" << std::flush;
-	//std::sort(cutOutColumn.begin(), cutOutColumn.end(), &Node::FeatureAndIndexSorter);
-	//std::sort(cutOutColumn.begin(), cutOutColumn.end(), &FeatureAndIndexSorter);
+
 	
-	//FIX THIS!!
+	//FIX THIS!!!	???
 	//sort the cut column based on the feature values
 	//to order the distribution...
 	bool swapped = true;
@@ -172,24 +179,21 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		}
 	}//END sort...
 
-	std::cout << "HERE 174\n\n" << std::flush;
 
 
 	std::deque<FeatureAndIndexAndLabel> leftSide, rightSide;
-	//copy everything after the first one into the rightSide
+
+	//copy everything after the first one into the 'rightSide'
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
 	{
 		rightSide.push_back( cutOutColumn[vectorIndex] );
 	}
-	std::cout << std::flush;
+
 
 
 	//define distribution bin size...
-
 	int desiredNumberOfBins = sqrt(numberOfFeatureVectors);
 	double binSize = (maximum_lab - minimum_lab) / desiredNumberOfBins;
-
-	std::cout << "HERE 188\n\n" << std::flush;
 	
 	//try all split locations... and save best one
 	//this can be optimized... no need to rebuild entire distribution each time
@@ -201,7 +205,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		FeatureAndIndexAndLabel mover = rightSide[0];
 		rightSide.pop_front();
 		leftSide.push_back( mover );
-		std::cout << "HERE 200\n\n" << std::flush;
 
 
 		//very much open for interpretation and change
@@ -209,23 +212,22 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		//this uses a dynamically scalled bin size to define discrete probability distribution functions
 		//and then uses kullback-leibler like math for a score...
 		//the distributions are built from the 'labels'
+
 		std::vector<double> leftDistribution, rightDistribution;
 		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
 		{
 			leftDistribution.push_back( 0.0 );
 			rightDistribution.push_back( 0.0 );
 		}
-		std::cout << "HERE 214\n\n" << std::flush;
+
 
 		//build distributions
 		for(int i = 0; i < (int)leftSide.size(); i++)					//go through left side
 		{
 			double nextValue = leftSide[i].l;
 			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
-			std::cout << "binIndex: " << binIndex << " " << nextValue << " " << binSize << " " << leftDistribution.size() << "\n\n" << std::flush;
 			leftDistribution[binIndex] += (1.0/(double)leftDistribution.size());	//for sum to 1 requirement
 		}
-		std::cout << "HERE 223\n\n" << std::flush;
 
 		for(int i = 0; i < (int)rightSide.size(); i++)					//go through right side
 		{
@@ -233,7 +235,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
 			rightDistribution[binIndex] += (1.0/(double)rightDistribution.size());	//for sum to 1 requirement
 		}
-		std::cout << "HERE 236\n\n" << std::flush;
+
 
 		//check defined criteria
 		//for all i: (P(i)>0) -> (Q(i)>0)
@@ -275,7 +277,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		}//if( zeroHeightRequirementSatisfied )
 
 	}//END for(splitLocation)
-	std::cout << "HERE 272\n\n" << std::flush;
+
 
 	SplitPoint ret;
 	ret.score = bestSplit_score;

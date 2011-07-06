@@ -3,14 +3,19 @@
 
 Forest::Forest()
 {
+	treeCount = DEFAULT_TREE_COUNT;
 }
 
+Forest::Forest( int tc )
+{
+	treeCount = tc;
+}
 
 void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 {
 	srand( ss );
 
-	for(int treeIndex = 0; treeIndex < TREE_COUNT; treeIndex++)
+	for(int treeIndex = 0; treeIndex < treeCount; treeIndex++)
 	{
 		std::cout << "building data matrix for treeIndex=" << treeIndex << "\n" << std::flush;
 

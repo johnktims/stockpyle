@@ -13,7 +13,7 @@
 #include "Tree.h"
 
 
-#define	TREE_COUNT	100
+#define	DEFAULT_TREE_COUNT	50
 
 #define	USE_BOOTSTRAPPING	1
 #define	BOOTSTRAP_RATIO		(0.6)
@@ -24,10 +24,12 @@ class Forest
 {
 	public:
 		Forest();
+		Forest( int tc );
 		void presentTrainingData( DataMatrix dm, int ss );
 
 
 	private:
+		int treeCount;
 		std::vector<Tree> allTrees;
 
 };

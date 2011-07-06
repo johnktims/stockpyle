@@ -20,7 +20,6 @@
 struct TrainingReturnType
 {
 	bool leafBool;
-	//std::vector<bool> partition;
 	std::vector<int> leftIndexes;
 	std::vector<int> rightIndexes;
 };
