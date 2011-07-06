@@ -57,7 +57,7 @@ int Tree::addNode( DataMatrix dm, int ss )
 		rightChildren.push_back( rci );
 		isLeaf.push_back(false);
 
-		std::cout << "\t\t{" << lci << "," << rci << "\n" << std::flush;
+		//std::cout << "\t\t{" << lci << "," << rci << "\n" << std::flush;
 	}
 
 	return ret;
