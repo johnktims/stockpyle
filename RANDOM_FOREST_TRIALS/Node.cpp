@@ -195,6 +195,27 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 	}
 
 
+	/*std::cout << "allIndexes=[";
+	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
+		std::cout << cutOutColumn[vectorIndex].i << " ";
+	std::cout << "];\n\n";
+
+	std::cout << "allFeatures=[";
+	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
+		std::cout << cutOutColumn[vectorIndex].f << " ";
+	std::cout << "];\n\n";
+
+	std::cout << "allLabels=[";
+	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
+		std::cout << cutOutColumn[vectorIndex].l << " ";
+	std::cout << "];\n\n";
+
+
+	char aaa;
+	std::cin >> aaa;*/
+
+
+
 
 	//define distribution bin size...
 	int desiredNumberOfBins = sqrt(numberOfFeatureVectors);
@@ -255,15 +276,15 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 				zeroHeightRequirementSatisfied = false;
 		}*/
 
-		printf("{");
+		/*printf("l_dist=[");
 		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
 			printf("%2.2f  ", leftDistribution[binIndex]);
-		printf("}\n{");
+		printf("];\nr_dist=[");
 
 		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
 			printf("%2.2f  ", rightDistribution[binIndex]);
-		printf("}\n");
-		printf("\n");
+		printf("];\n");
+		printf("\n");*/
 
 
 
@@ -305,17 +326,20 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		}
 		distributionDistance = pow(distributionDistance, (1.0/L_value));
 
-		std::cout << "~~~ " << distributionDistance << " " << (int)leftSide.size() << " ";
+		//std::cout << "~~~ " << distributionDistance << " " << (int)leftSide.size() << " ";
+		//std::cout << distributionDistance << " ";
 
 		if( (bestSplit_numberOnLeft == -1) || (distributionDistance > bestSplit_score) )
 		{
-			std::cout << "***";
+			//std::cout << "***";
 			bestSplit_numberOnLeft = (int)leftSide.size();
 			bestSplit_score = distributionDistance;
 		}
-		std::cout << "\n";
+		//std::cout << "\n";
 
 	}//END for(splitLocation)
+	//std::cout << "\n\n";
+
 
 
 	SplitPoint ret;

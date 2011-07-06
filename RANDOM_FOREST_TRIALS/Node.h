@@ -35,6 +35,8 @@ struct SplitPoint
 	double score;			//to maximize
 	int featInd;
 
+
+	//stat vals on the feature
 	double lm, rm, lv, rv;		//means and variances on FEATURE
 };
 

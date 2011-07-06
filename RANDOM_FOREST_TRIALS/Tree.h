@@ -31,8 +31,9 @@ class Tree
 		std::vector<int> rightChildren;
 		std::vector<bool> isLeaf;
 
+		int maxDepth;
 
-		int addNode( DataMatrix dm, int ss );
+		int addNode( DataMatrix dm, int ss, char childType, int level );
 };
 
 

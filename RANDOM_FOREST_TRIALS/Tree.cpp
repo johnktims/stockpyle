@@ -4,6 +4,7 @@
 Tree::Tree( std::string n )
 {
 	name = n;
+	maxDepth = -1;
 }
 
 
@@ -12,12 +13,17 @@ void Tree::presentTrainingData( DataMatrix dm, int ss )
 {
 	srand( ss );
 	
-	rootIndex = addNode( dm, rand() );
+	rootIndex = addNode( dm, rand(), 'T', 0 );
+
+	std::cout << "\n\nmaxDepth=" << maxDepth << "\n\n";
 }
 
-int Tree::addNode( DataMatrix dm, int ss )
+int Tree::addNode( DataMatrix dm, int ss, char childType, int level )
 {
-	std::cout << "\tadding a node to tree... dm.vectorCount()=" << dm.vectorCount() << "\n" << std::flush;
+	if( level > maxDepth )
+		maxDepth = level;
+
+	std::cout << "\tadding a node to tree... dm.vectorCount()=" << dm.vectorCount() << "  childType=" << childType << "  level=" << level << "\n" << std::flush;
 	int ret = allNodes.size();
 
 	Node nn;
@@ -50,8 +56,8 @@ int Tree::addNode( DataMatrix dm, int ss )
 		}
 
 
-		int lci = addNode( dm_left, rand() );
-		int rci = addNode( dm_right, rand() );
+		int lci = addNode( dm_left, rand(), 'L', level+1 );
+		int rci = addNode( dm_right, rand(), 'R', level+1 );
 
 		leftChildren.push_back( lci );
 		rightChildren.push_back( rci );
