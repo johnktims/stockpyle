@@ -11,6 +11,9 @@ Node::Node()
 
 TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 {
+	srand( ss );
+
+
 	TrainingReturnType trt;
 	(trt.leftIndexes).clear();
 	(trt.rightIndexes).clear();
@@ -23,15 +26,13 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 		return trt;
 	}
 
-	srand( ss );
-
 
 	//number of features...
 	int dimensionality = dm.getDimensionality();
 
 	//build a set of unique test indexes...
 	std::vector<int> testIndexes;
-	int numberOfFeaturesToTest = sqrt(dimensionality);
+	int numberOfFeaturesToTest = (int)sqrt((double)dimensionality);
 	while( (int)testIndexes.size() < numberOfFeaturesToTest )
 	{
 		//a possible test index
@@ -109,6 +110,7 @@ bool Node::isPure( DataMatrix dm )
 
 
 	//if at this node... the items previously here had this distribution...
+	//could be more complex...
 	representativeMean = mean;
 	representativeVariance = variance;
 
@@ -141,15 +143,18 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		cutOutColumn.push_back( newElement );
 
 
+		//init max and min
 		if( vectorIndex == 0 )
 		{
 			maximum_lab = newElement.l;
 			minimum_lab = newElement.l;
 		}
 
+		//update max
 		else if( maximum_lab < newElement.l )
 			maximum_lab = newElement.l;
 
+		//update min
 		else if( minimum_lab > newElement.l )
 			minimum_lab = newElement.l;
 
@@ -177,7 +182,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 				swapped = true;
 			}
 		}
-	}//END sort...
+	}//END sort...	
 
 
 
@@ -210,7 +215,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		//very much open for interpretation and change
 		//score the partition scheme
 		//this uses a dynamically scalled bin size to define discrete probability distribution functions
-		//and then uses kullback-leibler like math for a score...
 		//the distributions are built from the 'labels'
 
 		std::vector<double> leftDistribution, rightDistribution;
@@ -222,22 +226,24 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 
 		//build distributions
+		double l_dist_sum = 0.0;
+		double r_dist_sum = 0.0;
 		for(int i = 0; i < (int)leftSide.size(); i++)					//go through left side
 		{
 			double nextValue = leftSide[i].l;
 			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
-			leftDistribution[binIndex] += (1.0/(double)leftDistribution.size());	//for sum to 1 requirement
+			leftDistribution[binIndex] += (1.0/(double)leftSide.size());	//for sum to 1 requirement
 		}
 
 		for(int i = 0; i < (int)rightSide.size(); i++)					//go through right side
 		{
 			double nextValue = rightSide[i].l;
 			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
-			rightDistribution[binIndex] += (1.0/(double)rightDistribution.size());	//for sum to 1 requirement
+			rightDistribution[binIndex] += (1.0/(double)rightSide.size());	//for sum to 1 requirement
 		}
 
 
-		//check defined criteria
+		/*//check defined criteria
 		//for all i: (P(i)>0) -> (Q(i)>0)
 		bool zeroHeightRequirementSatisfied = true;
 		for(int binIndex = 0; zeroHeightRequirementSatisfied && (binIndex < desiredNumberOfBins); binIndex++)
@@ -247,9 +253,22 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 			if( atLeastOneZero && bothZero )
 				zeroHeightRequirementSatisfied = false;
-		}
+		}*/
 
-		if( zeroHeightRequirementSatisfied )
+		printf("{");
+		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
+			printf("%2.2f  ", leftDistribution[binIndex]);
+		printf("}\n{");
+
+		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
+			printf("%2.2f  ", rightDistribution[binIndex]);
+		printf("}\n");
+		printf("\n");
+
+
+
+
+		/*if( zeroHeightRequirementSatisfied )
 		{
 			//sign issues???
 			double KB_1 = 0.0;
@@ -257,39 +276,51 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 			for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
 			{
 				double rat_1 = leftDistribution[binIndex] / rightDistribution[binIndex];
-				if( rat_1 > 0.0 )
+				if( leftDistribution[binIndex] > 0.0 )
 					KB_1 += leftDistribution[binIndex] * (log(rat_1) / log(2.0));
 
 				double rat_2 = rightDistribution[binIndex] / leftDistribution[binIndex];
-				if( rat_2 > 0.0 )
+				if( rat_2 > rightDistribution[binIndex] )
 					KB_2 += rightDistribution[binIndex] * (log(rat_2) / log(2.0));
 			}//END for(binIndex)
 
 			double thisSplitsScore = 0.5*(KB_1 + KB_2);
 
-
+			std::cout << "\t\tthisSplitsScore: " << thisSplitsScore << "\n" << std::flush;
 			//initilize or update 'bests'
 			if( (bestSplit_numberOnLeft == -1) || (thisSplitsScore > bestSplit_score) )
 			{
 				bestSplit_numberOnLeft = (int)leftSide.size();
 				bestSplit_score = thisSplitsScore;
 			}
-		}//if( zeroHeightRequirementSatisfied )
+		}//if( zeroHeightRequirementSatisfied )*/
+
+
+		int L_value = 2;	//restricted to int... its just cleaner to talk about
+		double distributionDistance = 0.0;
+		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
+		{
+			double dd = fabs( leftDistribution[binIndex] - rightDistribution[binIndex] );
+			distributionDistance += pow(dd, L_value);
+		}
+		distributionDistance = pow(distributionDistance, (1.0/L_value));
+
+		std::cout << "~~~ " << distributionDistance << " " << (int)leftSide.size() << " ";
+
+		if( (bestSplit_numberOnLeft == -1) || (distributionDistance > bestSplit_score) )
+		{
+			std::cout << "***";
+			bestSplit_numberOnLeft = (int)leftSide.size();
+			bestSplit_score = distributionDistance;
+		}
+		std::cout << "\n";
 
 	}//END for(splitLocation)
 
 
 	SplitPoint ret;
 	ret.score = bestSplit_score;
-	//for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
-	//	(ret.partition).push_back( false );
-	
-	//first 'bestSplit_numberOnLeft' in 'cutOutColumn' go to the left
-	//for(int kk = 0; kk < bestSplit_numberOnLeft; kk++)
-	//{
-	//	int indexThatGoesToLeft = cutOutColumn[kk].i;
-	//	//(ret.partition)[indexThatGoesToLeft] = true;
-	//}
+
 
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
 	{

@@ -6,6 +6,7 @@
 #include <deque>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <algorithm>
 
 #include "DataMatrix.h"
@@ -62,7 +63,9 @@ class Node
 		SplitPoint findPartition( DataMatrix dm, int featureIndex );
 
 
-		double representativeMean, representativeVariance;	//at this node...
+		//at this node...
+		//could be more complex...
+		double representativeMean, representativeVariance;
 
 
 
