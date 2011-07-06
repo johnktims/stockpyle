@@ -9,13 +9,25 @@
 #include <limits.h>
 
 
-#define	NUMBER_OF_FEATURES		10
-#define	NUMBER_OF_FEATURE_VECTORS	1000
-#define	NUMBER_OF_TREES			1
+#define	NUMBER_OF_FEATURES			10
+#define	NUMBER_OF_TYPES				5
+#define	NUMBER_OF_FEATURE_VECTORS_PER_TYPE	1000
+
+#define	NUMBER_OF_TREES				1
+
+
+struct FeatureStatistics
+{
+	std::vector<double> coefficientVector;
+	std::vector<double> exponentialVector;
+
+	std::vector<double> meanVector;
+	std::vector<double> varianceVector;
+};
+
 
 
 DataMatrix dm;
-
 
 
 //uniform ranged doubles...
@@ -27,36 +39,40 @@ double randomDouble( double min, double max )
 	return ret;
 }
 
-void buildDataMatrix()
-{
-	std::vector<double> feature_coefficients;
-	std::vector<double> feature_exponents;
 
-	for(int featureIndex = 0; featureIndex < NUMBER_OF_FEATURES; featureIndex++)
+double randomNormal( double m, double v )
+{
+	int n = 100;
+	std::vector<double> y;
+	double sum_y = 0.0;
+	for(int i = 0; i < n; i++)
 	{
-		//feature_coefficients.push_back( randomDouble(-3, +4) );
-		feature_coefficients.push_back( 1.0 );
-		//feature_exponents.push_back( randomDouble(0, +2) );
-		feature_exponents.push_back( 1.0 );
+		double newVal = rand();
+		y.push_back( newVal );
+		sum_y += newVal;
 	}
 
+	double ret = ((1.0/INT_MAX) * sqrt(12.0/n) * sum_y) - sqrt(3*n);
+	ret *= sqrt(v);
+	ret += m;
 
-	for(int vectorIndex = 0; vectorIndex < NUMBER_OF_FEATURE_VECTORS; vectorIndex++)
-	{
-		double label = 0.0;
+	return ret;
+}
 
-		FeatureVector fv;
-		for(int featureIndex = 0; featureIndex < NUMBER_OF_FEATURES; featureIndex++)
-		{
-			double newFeature = randomDouble( -2, +2 );
-			fv.addFeature( newFeature );
-			label += feature_coefficients[featureIndex] * pow(newFeature, feature_exponents[featureIndex]);
-		}//END for(featureIndex)
 
-		fv.setLabel( label );
 
-		dm.addFeatureVector( fv );
-	}//END for(vectorIndex)
+void buildStatistics()
+{
+
+}
+
+
+
+
+
+void buildDataMatrix()
+{
+
 }
 
 
@@ -65,11 +81,17 @@ int main( int argc, char* argv[] )
 {
 	srand( 0 );
 
-	buildDataMatrix();
+	std::cout << "nums=[";
+	for(int i = 0; i < 10000; i++)
+		std::cout << randomNormal( 3, 4 ) << " ";
+	std::cout << "];\n\n";
 
+
+
+	/*buildDataMatrix();
 
 	Forest fst( NUMBER_OF_TREES );
-	fst.presentTrainingData( dm, rand() );
+	fst.presentTrainingData( dm, rand() );*/
 
 	return 0;
 }
