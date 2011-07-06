@@ -36,8 +36,8 @@ void buildDataMatrix()
 	{
 		feature_coefficients.push_back( randomDouble(-3, +4) );
 		//feature_coefficients.push_back( 1.0 );
-		feature_exponents.push_back( randomDouble(0, +2) );
-		//feature_exponents.push_back( 1.0 );
+		//feature_exponents.push_back( randomDouble(0, +2) );
+		feature_exponents.push_back( 1.0 );
 	}
 
 

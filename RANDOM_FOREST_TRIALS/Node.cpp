@@ -235,7 +235,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 		rightSide.pop_front();
 		leftSide.push_back( mover );
 
-
 		//very much open for interpretation and change
 		//score the partition scheme
 		//this uses a dynamically scalled bin size to define discrete probability distribution functions
@@ -247,7 +246,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 			leftDistribution.push_back( 0.0 );
 			rightDistribution.push_back( 0.0 );
 		}
-
 
 		//build distributions
 		double l_dist_sum = 0.0;
@@ -265,7 +263,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
 			rightDistribution[binIndex] += (1.0/(double)rightSide.size());	//for sum to 1 requirement
 		}
-
 
 		/*//check defined criteria
 		//for all i: (P(i)>0) -> (Q(i)>0)
@@ -342,7 +339,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 	}//END for(splitLocation)
 	//std::cout << "\n\n";
-
 
 
 	SplitPoint ret;

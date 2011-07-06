@@ -41,6 +41,7 @@ int Tree::addNode( DataMatrix dm, int ss, char childType, int level )
 
 	else
 	{
+		std::cout << "\t\t(int)(trt_ret.leftIndexes).size()=" << (int)(trt_ret.leftIndexes).size() << "\n" << std::flush;
 		DataMatrix dm_left;
 		for(int i = 0; i < (int)(trt_ret.leftIndexes).size(); i++)
 		{
