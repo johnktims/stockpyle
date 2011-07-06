@@ -23,6 +23,9 @@ class Tree
 		void presentTrainingData( DataMatrix dm, int ss );
 
 
+		ClassifyReturnType classifyVector( FeatureVector fv );
+
+
 	private:
 		std::string name;
 		int rootIndex;

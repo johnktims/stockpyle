@@ -48,6 +48,12 @@ struct FeatureAndIndexAndLabel
 };
 
 
+struct ClassifyReturnType
+{
+	double m, v;
+};
+
+
 
 
 class Node
@@ -56,8 +62,13 @@ class Node
 		Node();
 		TrainingReturnType presentTrainingData( DataMatrix dm, int ss );
 
+		bool isLeaf();
+		bool goLeft( FeatureVector fv );
+		ClassifyReturnType classifyVector( FeatureVector fv );
+
 
 	private:
+		bool leafiness;
 		SplitPoint rememberedSplit;	//partition not remembered...
 
 		bool isPure( DataMatrix dm );
@@ -67,7 +78,8 @@ class Node
 
 		//at this node...
 		//could be more complex...
-		double representativeMean, representativeVariance;
+		//double representativeMean, representativeVariance;
+		ClassifyReturnType representative;
 
 
 

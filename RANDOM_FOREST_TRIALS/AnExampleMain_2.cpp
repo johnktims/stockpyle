@@ -34,10 +34,10 @@ void buildDataMatrix()
 
 	for(int featureIndex = 0; featureIndex < NUMBER_OF_FEATURES; featureIndex++)
 	{
-		//feature_coefficients.push_back( randomDouble(-3, +4) );
-		feature_coefficients.push_back( 1.0 );
-		//feature_exponents.push_back( randomDouble(0, +2) );
-		feature_exponents.push_back( 1.0 );
+		feature_coefficients.push_back( randomDouble(-3, +4) );
+		//feature_coefficients.push_back( 1.0 );
+		feature_exponents.push_back( randomDouble(0, +2) );
+		//feature_exponents.push_back( 1.0 );
 	}
 
 

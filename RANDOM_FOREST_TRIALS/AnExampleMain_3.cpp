@@ -2,7 +2,7 @@
 //tests ability to predict polynomial functions
 
 //COMPILE:
-//	g++ -o AnExampleMain_2 AnExampleMain_2.cpp FeatureVector.cpp DataMatrix.cpp Node.cpp Tree.cpp Forest.cpp
+//	g++ -o AnExampleMain_3 AnExampleMain_3.cpp FeatureVector.cpp DataMatrix.cpp Node.cpp Tree.cpp Forest.cpp
 
 
 #include "Forest.h"
@@ -27,6 +27,8 @@ struct FeatureStatistics
 
 
 
+double means[NUMBER_OF_TYPES][NUMBER_OF_FEATURES];
+double variances[NUMBER_OF_TYPES][NUMBER_OF_FEATURES];
 DataMatrix dm;
 
 
@@ -60,10 +62,18 @@ double randomNormal( double m, double v )
 }
 
 
-
+#define	NUMBER_OF_FEATURES			10
+#define	NUMBER_OF_TYPES				5
 void buildStatistics()
 {
-
+	for(int ti = 0; ti < NUMBER_OF_TYPES; ti++)
+	{
+		for(int fi = 0; fi < NUMBER_OF_FEATURES; fi++)
+		{
+			means[ti][fi] = randomDouble(-5, +5);
+			variances[ti][fi] = randomDouble(1, +5);
+		}
+	}//END for(ti)
 }
 
 
@@ -79,19 +89,11 @@ void buildDataMatrix()
 
 int main( int argc, char* argv[] )
 {
-	srand( 0 );
-
-	std::cout << "nums=[";
-	for(int i = 0; i < 10000; i++)
-		std::cout << randomNormal( 3, 4 ) << " ";
-	std::cout << "];\n\n";
-
-
-
-	/*buildDataMatrix();
+	buildStatistics();
+	buildDataMatrix();
 
 	Forest fst( NUMBER_OF_TREES );
-	fst.presentTrainingData( dm, rand() );*/
+	fst.presentTrainingData( dm, rand() );
 
 	return 0;
 }

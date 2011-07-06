@@ -70,4 +70,28 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 }
 
 
+//can make this better??
+double Forest::classifyVector( FeatureVector fv )
+{
+	double averageMean = 0.0;
+	double minimumExpectation = 0.0;
+	for(int treeIndex = 0; treeIndex < treeCount; treeIndex++)
+	{
+		ClassifyReturnType crt = allTrees[treeIndex].classifyVector(fv);
+
+		averageMean += crt.m;
+
+		double lowExpectation = crt.m - 3*crt.v;
+
+		if( (treeIndex == 0) || (lowExpectation < minimumExpectation) )
+			minimumExpectation = lowExpectation;
+	}
+	averageMean /= treeCount;
+
+	//return averageMean;			//may be good for predicting...
+	return minimumExpectation;		//should be good for ranking...
+}
+
+
+
 

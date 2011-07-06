@@ -20,6 +20,7 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 
 	if( isPure( dm ) )
 	{
+		leafiness = true;
 		trt.leafBool = true;
 		//no need to build partition...
 
@@ -111,8 +112,10 @@ bool Node::isPure( DataMatrix dm )
 
 	//if at this node... the items previously here had this distribution...
 	//could be more complex...
-	representativeMean = mean;
-	representativeVariance = variance;
+	//representativeMean = mean;
+	//representativeVariance = variance;
+	representative.m = mean;
+	representative.v = variance;
 
 	return variance < MAXIMUM_PURE_VARIANCE;
 }//END isPure()
@@ -400,4 +403,42 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 //{
 //	return lhs.f < rhs.f;
 //}
+
+
+
+bool Node::isLeaf()
+{
+	return leafiness;
+}
+
+//assumes that this node is NOT a leaf...
+//it may seg fault otherwise...
+bool Node::goLeft( FeatureVector fv )
+{
+	double fVal = fv.getFeature( rememberedSplit.featInd );
+
+	double off_l = fVal - rememberedSplit.lm;	//dist from left mean
+	double d_l = (off_l*off_l) / (2*rememberedSplit.lv);
+	double pdfAmp_l = (1.0/sqrt(2*3.14*rememberedSplit.lv)) * exp(-d_l);
+
+	double off_r = fVal - rememberedSplit.rm;	//dist from right mean
+	double d_r = (off_r*off_r) / (2*rememberedSplit.rv);
+	double pdfAmp_r = (1.0/sqrt(2*3.14*rememberedSplit.rv)) * exp(-d_r);
+
+	return pdfAmp_l > pdfAmp_r;
+}
+
+ClassifyReturnType Node::classifyVector( FeatureVector fv )
+{
+	return representative;
+}
+
+
+
+
+
+
+
+
+
 

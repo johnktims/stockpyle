@@ -27,6 +27,8 @@ class Forest
 		Forest( int tc );
 		void presentTrainingData( DataMatrix dm, int ss );
 
+		double classifyVector( FeatureVector fv );
+
 
 	private:
 		int treeCount;

@@ -70,4 +70,21 @@ int Tree::addNode( DataMatrix dm, int ss, char childType, int level )
 }
 
 
+ClassifyReturnType Tree::classifyVector( FeatureVector fv )
+{
+	int currentNodeIndex = rootIndex;
+	while( !allNodes[currentNodeIndex].isLeaf() )
+	{
+		if( allNodes[currentNodeIndex].goLeft(fv) )
+			currentNodeIndex = leftChildren[currentNodeIndex];
+
+		else
+			currentNodeIndex = rightChildren[currentNodeIndex];
+	}//while not at a leaf...
+
+	return allNodes[currentNodeIndex].classifyVector(fv);
+}
+
+
+
 
