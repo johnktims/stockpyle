@@ -7,7 +7,7 @@
 #include <limits.h>
 
 #define	TRAINING_RATIO		0.7
-#define	NUMBER_OF_TREES		100
+#define	NUMBER_OF_TREES		10
 
 
 
