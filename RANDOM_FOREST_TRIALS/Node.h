@@ -12,7 +12,9 @@
 #include "DataMatrix.h"
 
 
-//variance on labels
+//purity on labels
+//5*sqrt(v) = 0.5 -> v = 0.01
+//(even 5 standard deviations out, the values are within 0.5 <half a percent> of mean)
 #define	MAXIMUM_PURE_VARIANCE		0.001
 #define	MINIMUM_NUMBER_OF_VECTORS	3
 

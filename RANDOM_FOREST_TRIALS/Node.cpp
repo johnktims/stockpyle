@@ -64,6 +64,19 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 		
 	}//END for(all test indexes)
 
+	if( dm.vectorCount() < 10 )
+	{
+		std::cout << "\t\t\tLEFT:  [";
+		for(int i = 0; i < (int)bestSplit.leftIndexes.size(); i++)
+			std::cout << bestSplit.leftIndexes[i] << " ";
+		std::cout << "];\n";
+
+		std::cout << "\t\t\tRIGHT: [";
+		for(int i = 0; i < (int)bestSplit.rightIndexes.size(); i++)
+			std::cout << bestSplit.rightIndexes[i] << " ";
+		std::cout << "];\n";
+	}
+
 
 
 	//TrainingReturnType trt;
@@ -190,11 +203,14 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 
 	std::deque<FeatureAndIndexAndLabel> leftSide, rightSide;
+	//double left_label_sum = 0.0;
+	//double right_label_sum = 0.0;
 
 	//copy everything after the first one into the 'rightSide'
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
 	{
 		rightSide.push_back( cutOutColumn[vectorIndex] );
+		//right_label_sum += cutOutColumn[vectorIndex].l;
 	}
 
 
@@ -228,12 +244,26 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 	//this can be optimized... no need to rebuild entire distribution each time
 	double bestSplit_score = -1;
 	int bestSplit_numberOnLeft = -1;
-	while( (int)rightSide.size() > 0 )
+	while( (int)rightSide.size() >= 2 )	//STILL HAS 1 TO GIVE TO 'LEFT'
 	{
 		//move the least right element from the right set to the right most in the left set
 		FeatureAndIndexAndLabel mover = rightSide[0];
 		rightSide.pop_front();
 		leftSide.push_back( mover );
+
+		/*right_label_sum -= mover.l;
+		left_label_sum += mover.l;
+
+		double right_label_mean = right_label_sum / rightSide.size();
+		double left_label_mean = left_label_sum / leftSide.size();
+
+		double nextScore = fabs(right_label_mean - left_label_mean);
+		if(nextScore > bestSplit_score)
+		{
+			bestSplit_numberOnLeft = (int)leftSide.size();
+			bestSplit_score = nextScore;
+		}*/
+
 
 		//very much open for interpretation and change
 		//score the partition scheme
