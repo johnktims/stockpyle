@@ -23,17 +23,8 @@ int Tree::addNode( DataMatrix dm, int ss, char childType, int level )
 	if( level > maxDepth )
 		maxDepth = level;
 
-	std::cout << "\tadding a node to tree... dm.vectorCount()=" << dm.vectorCount() << "  childType=" << childType << "  level=" << level << "\n" << std::flush;
+	//std::cout << "\tadding a node to tree... dm.vectorCount()=" << dm.vectorCount() << "  childType=" << childType << "  level=" << level << "\n" << std::flush;
 
-	if( dm.vectorCount() < 10 )
-	{
-		std::cout << "\t\t{";
-		for(int ii = 0; ii < dm.vectorCount(); ii++)
-		{
-			std::cout << dm.getFeatureVector(ii).getLabel() << " ";
-		}
-		std::cout << "};\n";
-	}
 
 	int ret = allNodes.size();
 
@@ -85,8 +76,11 @@ int Tree::addNode( DataMatrix dm, int ss, char childType, int level )
 ClassifyReturnType Tree::classifyVector( FeatureVector fv )
 {
 	int currentNodeIndex = rootIndex;
-	while( !allNodes[currentNodeIndex].isLeaf() )
+	//while( !allNodes[currentNodeIndex].isLeaf() )
+	while( allNodes[currentNodeIndex].isLeaf() == NON_LEAF_CONST )
 	{
+		std::cout << "currentNodeIndex = " << currentNodeIndex << "\n";
+		std::cout << "allNodes[currentNodeIndex].isLeaf() = " << allNodes[currentNodeIndex].isLeaf() << "\n";
 		if( allNodes[currentNodeIndex].goLeft(fv) )
 			currentNodeIndex = leftChildren[currentNodeIndex];
 

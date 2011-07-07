@@ -7,7 +7,7 @@
 #include <limits.h>
 
 #define	TRAINING_RATIO		0.7
-#define	NUMBER_OF_TREES		10
+#define	NUMBER_OF_TREES		5
 
 
 
@@ -110,7 +110,7 @@ int main(int argc, char* argv[] )
 	//test the fully trained forest
 	for(int vectorIndex = 0; vectorIndex < numberOfTestingVectors; vectorIndex++)
 	{
-		
+		fst.classifyVector( test_dm.getFeatureVector(vectorIndex) );
 	}//END for(vectorIndex)
 
 	return 0;

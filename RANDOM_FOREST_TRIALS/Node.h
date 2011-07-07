@@ -15,8 +15,12 @@
 //purity on labels
 //5*sqrt(v) = 0.5 -> v = 0.01
 //(even 5 standard deviations out, the values are within 0.5 <half a percent> of mean)
-#define	MAXIMUM_PURE_VARIANCE		0.001
+#define	MAXIMUM_PURE_VARIANCE		0.01
 #define	MINIMUM_NUMBER_OF_VECTORS	3
+
+
+#define	LEAF_CONST	1
+#define	NON_LEAF_CONST	0
 
 
 
@@ -64,13 +68,13 @@ class Node
 		Node();
 		TrainingReturnType presentTrainingData( DataMatrix dm, int ss );
 
-		bool isLeaf();
+		int isLeaf();
 		bool goLeft( FeatureVector fv );
 		ClassifyReturnType classifyVector( FeatureVector fv );
 
 
 	private:
-		bool leafiness;
+		int leafiness;
 		SplitPoint rememberedSplit;	//partition not remembered...
 
 		bool isPure( DataMatrix dm );
