@@ -107,7 +107,8 @@ ClassifyReturnType Tree::classifyVector( FeatureVector fv )
 
 	int currentNodeIndex = rootIndex;
 	//while( !allNodes[currentNodeIndex].isLeaf() )
-	while( allNodes[currentNodeIndex].isLeaf() == NON_LEAF_CONST )
+	//while( allNodes[currentNodeIndex].isLeaf() == NON_LEAF_CONST )
+	while( !allNodes[currentNodeIndex].isLeaf() )
 	{
 		//std::cout << "\n\n\ncurrentNodeIndex = " << currentNodeIndex << "\n";
 		//std::cout << "allNodes[currentNodeIndex].isLeaf() = " << allNodes[currentNodeIndex].isLeaf() << "\n";

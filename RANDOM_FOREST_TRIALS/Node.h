@@ -19,8 +19,8 @@
 #define	MINIMUM_NUMBER_OF_VECTORS	3
 
 
-#define	LEAF_CONST	1
-#define	NON_LEAF_CONST	0
+//#define	LEAF_CONST	1
+//#define	NON_LEAF_CONST	0
 
 
 

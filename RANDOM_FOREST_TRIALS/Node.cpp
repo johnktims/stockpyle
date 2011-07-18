@@ -109,8 +109,8 @@ bool Node::isPure( DataMatrix dm )
 {
 	int numberOfFeatureVectors = dm.vectorCount();
 
-	if( numberOfFeatureVectors <= MINIMUM_NUMBER_OF_VECTORS )
-		return true;
+	//if( numberOfFeatureVectors <= MINIMUM_NUMBER_OF_VECTORS )
+	//	return true;
 
 	//will be slightly off foe small values of 'numberOfFeatureVectors' (b/c N-1)
 	double sum_x = 0.0;
@@ -123,6 +123,7 @@ bool Node::isPure( DataMatrix dm )
 	}//END for(vectorIndex)
 	double mean = sum_x / numberOfFeatureVectors;
 
+
 	//this is variance on the labels...
 	double variance = (sum_x_squared/numberOfFeatureVectors) - (mean*mean);
 
@@ -134,7 +135,7 @@ bool Node::isPure( DataMatrix dm )
 	representative.m = mean;
 	representative.v = variance;
 
-	return variance < MAXIMUM_PURE_VARIANCE;
+	return (variance < MAXIMUM_PURE_VARIANCE) || (numberOfFeatureVectors <= MINIMUM_NUMBER_OF_VECTORS);
 }//END isPure()
 
 

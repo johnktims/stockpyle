@@ -6,15 +6,15 @@
 #include "Forest.h"
 #include <limits.h>
 
-#define	TRAINING_RATIO		0.7
+#define	TRAINING_RATIO		0.95
 #define	NUMBER_OF_TREES		1
 
 
 
 //used to generate toy data...
 //remove when using REAL data
-#define	NUMBER_OF_FEATURES		10
-#define	NUMBER_OF_FEATURE_VECTORS	10
+#define	NUMBER_OF_FEATURES		5
+#define	NUMBER_OF_FEATURE_VECTORS	1000
 
 
 
