@@ -26,10 +26,7 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 		#if USE_BOOTSTRAPPING == 0
 		//dm_toUse = dm;	//copy correctly??? or do i need to add them all??
 		for(int exampleIndex = 0; exampleIndex < dm.vectorCount(); exampleIndex++)
-		{
-			//dm_toUse.addFeatureVector( dm.getFeatureVector(exampleIndex) );
 			indexesToAdd.push_back( exampleIndex );
-		}
 		#endif
 
 		#if USE_BOOTSTRAPPING == 1
@@ -60,11 +57,10 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 		std::stringstream treeName(std::stringstream::in | std::stringstream::out);
 		treeName << "TREE_" << treeIndex;
 		Tree tt( treeName.str() );
+		allTrees.push_back( tt );
 
 		std::cout << "TRAINING treeIndex=" << treeIndex << "\n" << std::flush;
-		allTrees.push_back( tt );
 		allTrees[allTrees.size()-1].presentTrainingData( dm_toUse, rand() );
-
 
 	}//END for(treeIndex)
 }
@@ -75,18 +71,33 @@ double Forest::classifyVector( FeatureVector fv )
 {
 	double averageMean = 0.0;
 	double minimumExpectation = 0.0;
+	double maximumExpectation = 0.0;
 	for(int treeIndex = 0; treeIndex < treeCount; treeIndex++)
 	{
 		ClassifyReturnType crt = allTrees[treeIndex].classifyVector(fv);
 
 		averageMean += crt.m;
 
-		double lowExpectation = crt.m - 3*crt.v;
+		int numStDevOut = 3;
+		double lowExpectation = crt.m - numStDevOut*crt.v;
+		double highExpectation = crt.m + numStDevOut*crt.v;
 
 		if( (treeIndex == 0) || (lowExpectation < minimumExpectation) )
 			minimumExpectation = lowExpectation;
+
+		if( (treeIndex == 0) || (highExpectation > maximumExpectation) )
+			maximumExpectation = highExpectation;
 	}
 	averageMean /= treeCount;
+
+	std::cout << "classifyVector(...)\n";
+	std::cout << "\treal label: " << fv.getLabel() << "\n";
+	std::cout << "\tanticipated labels:\n";
+	std::cout << "\t\tminimum: " << minimumExpectation << "\n";
+	std::cout << "\t\tmaximum: " << maximumExpectation << "\n";
+	std::cout << "\t\taverage: " << averageMean << "\n";
+
+	std::cout << "\n\n\n";
 
 	//return averageMean;			//may be good for predicting...
 	return minimumExpectation;		//should be good for ranking...

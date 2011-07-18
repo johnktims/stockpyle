@@ -68,13 +68,13 @@ class Node
 		Node();
 		TrainingReturnType presentTrainingData( DataMatrix dm, int ss );
 
-		int isLeaf();
+		bool isLeaf();
 		bool goLeft( FeatureVector fv );
 		ClassifyReturnType classifyVector( FeatureVector fv );
 
 
 	private:
-		int leafiness;
+		bool leafiness;
 		SplitPoint rememberedSplit;	//partition not remembered...
 
 		bool isPure( DataMatrix dm );

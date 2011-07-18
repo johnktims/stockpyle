@@ -6,7 +6,7 @@ Node::Node()
 {
 	//(rememberedSplit.leftIndexes).clear();
 	//(rememberedSplit.rightIndexes).clear();
-	leafiness = -1;
+	leafiness = false;
 }
 
 
@@ -21,13 +21,16 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 
 	if( isPure( dm ) )
 	{
-		leafiness = LEAF_CONST;
+		//leafiness = LEAF_CONST;
+		leafiness = true;
 		trt.leafBool = true;
 		//no need to build partition...
 
 		return trt;
 	}
-	leafiness = NON_LEAF_CONST;
+	//leafiness = NON_LEAF_CONST;
+	leafiness = false;
+	trt.leafBool = false;
 
 
 	//number of features...
@@ -81,8 +84,7 @@ TrainingReturnType Node::presentTrainingData( DataMatrix dm, int ss )
 
 
 
-	//TrainingReturnType trt;
-	trt.leafBool = false;
+	//TrainingReturnType trt;	
 	for(int vectorIndex = 0; vectorIndex < (int)(bestSplit.leftIndexes).size(); vectorIndex++)
 			(trt.leftIndexes).push_back( (bestSplit.leftIndexes)[vectorIndex] );
 
@@ -434,7 +436,7 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 
 
-int Node::isLeaf()
+bool Node::isLeaf()
 {
 	return leafiness;
 }
@@ -443,7 +445,7 @@ int Node::isLeaf()
 //it may seg fault otherwise...
 bool Node::goLeft( FeatureVector fv )
 {
-	std::cout << "\t" << rememberedSplit.featInd << " " << fv.featureCount() << " ~~~ " << leafiness << "\n";
+	//std::cout << "\t" << rememberedSplit.featInd << " " << fv.featureCount() << " ~~~ " << leafiness << "\n";
 	double fVal = fv.getFeature( rememberedSplit.featInd );
 
 	double off_l = fVal - rememberedSplit.lm;	//dist from left mean

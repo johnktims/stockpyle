@@ -7,17 +7,19 @@
 #include <limits.h>
 
 #define	TRAINING_RATIO		0.7
-#define	NUMBER_OF_TREES		5
+#define	NUMBER_OF_TREES		1
 
 
 
 //used to generate toy data...
 //remove when using REAL data
 #define	NUMBER_OF_FEATURES		10
-#define	NUMBER_OF_FEATURE_VECTORS	1000
+#define	NUMBER_OF_FEATURE_VECTORS	10
+
 
 
 DataMatrix full_dm;
+DataMatrix train_dm, test_dm;
 
 
 
@@ -81,13 +83,12 @@ int main(int argc, char* argv[] )
 
 
 
-	
+
 
 	int numberOfVectors = full_dm.vectorCount();
 
 
 	//build training and testing data matricies
-	DataMatrix train_dm, test_dm;
 	for(int vectorIndex = 0; vectorIndex < numberOfVectors; vectorIndex++)
 	{
 		double randVal = randomDouble(0.0, 1.0);
