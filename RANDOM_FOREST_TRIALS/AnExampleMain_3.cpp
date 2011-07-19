@@ -89,6 +89,8 @@ void buildDataMatrix()
 
 int main( int argc, char* argv[] )
 {
+	srand( time( NULL ) );
+
 	buildStatistics();
 	buildDataMatrix();
 

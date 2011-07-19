@@ -15,7 +15,7 @@
 
 int main( int argc, char* argv[] )
 {
-	srand( 0 );
+	srand( time( NULL ) );
 
 	DataMatrix dm;
 	for(int vectorIndex = 0; vectorIndex < NUMBER_OF_FEATURE_VECTORS; vectorIndex++)
