@@ -150,8 +150,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 	//find minimum and maximum label values
 	//as well as build 'cutOutColumn' for this feature index
-	double maximum_lab = 0.0;
-	double minimum_lab = 0.0;
 	std::vector<FeatureAndIndexAndLabel> cutOutColumn;
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
 	{
@@ -162,22 +160,6 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 
 		cutOutColumn.push_back( newElement );
-
-
-		//init max and min
-		if( vectorIndex == 0 )
-		{
-			maximum_lab = newElement.l;
-			minimum_lab = newElement.l;
-		}
-
-		//update max
-		else if( maximum_lab < newElement.l )
-			maximum_lab = newElement.l;
-
-		//update min
-		else if( minimum_lab > newElement.l )
-			minimum_lab = newElement.l;
 
 	}//END for(vectorIndex)
 
@@ -208,176 +190,144 @@ SplitPoint Node::findPartition( DataMatrix dm, int featureIndex )
 
 
 	std::deque<FeatureAndIndexAndLabel> leftSide, rightSide;
-	//double left_label_sum = 0.0;
-	//double right_label_sum = 0.0;
 
 	//copy everything after the first one into the 'rightSide'
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
-	{
 		rightSide.push_back( cutOutColumn[vectorIndex] );
-		//right_label_sum += cutOutColumn[vectorIndex].l;
-	}
-
-
-	/*std::cout << "allIndexes=[";
-	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
-		std::cout << cutOutColumn[vectorIndex].i << " ";
-	std::cout << "];\n\n";
-
-	std::cout << "allFeatures=[";
-	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
-		std::cout << cutOutColumn[vectorIndex].f << " ";
-	std::cout << "];\n\n";
-
-	std::cout << "allLabels=[";
-	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
-		std::cout << cutOutColumn[vectorIndex].l << " ";
-	std::cout << "];\n\n";
-
-
-	char aaa;
-	std::cin >> aaa;*/
 
 
 
 
-	//define distribution bin size...
-	int desiredNumberOfBins = sqrt(numberOfFeatureVectors);
-	double binSize = (maximum_lab - minimum_lab) / desiredNumberOfBins;
+
 	
 	//try all split locations... and save best one
 	//this can be optimized... no need to rebuild entire distribution each time
 	double bestSplit_score = -1;
 	int bestSplit_numberOnLeft = -1;
-	while( (int)rightSide.size() >= 2 )	//STILL HAS 1 TO GIVE TO 'LEFT'
+	while( (int)rightSide.size() >= 2 )	//STILL HAS 1 TO "GIVE" TO 'LEFT'
 	{
 		//move the least right element from the right set to the right most in the left set
 		FeatureAndIndexAndLabel mover = rightSide[0];
 		rightSide.pop_front();
 		leftSide.push_back( mover );
 
-		/*right_label_sum -= mover.l;
-		left_label_sum += mover.l;
 
-		double right_label_mean = right_label_sum / rightSide.size();
-		double left_label_mean = left_label_sum / leftSide.size();
+		std::vector<double> labels_left;
+		for(int ind = 0; ind < (int)leftSide.size(); ind++)
+			labels_left.push_back( leftSide[ind].l );
+		sort(labels_left.begin(), labels_left.end());
 
-		double nextScore = fabs(right_label_mean - left_label_mean);
-		if(nextScore > bestSplit_score)
+		std::vector<double> labels_right;
+		for(int ind = 0; ind < (int)rightSide.size(); ind++)
+			labels_right.push_back( rightSide[ind].l );
+		sort(labels_right.begin(), labels_right.end());
+
+
+		std::vector<double> sorted_labels;
+		std::vector<bool> belongs_to_left;
+		std::vector<double> ranks;
+
+
+		int li = 0;	//left index
+		int ri = 0;
+		double le, re;
+		while( (li < labels_left.size()) && (ri < labels_right.size()) )
 		{
-			bestSplit_numberOnLeft = (int)leftSide.size();
-			bestSplit_score = nextScore;
-		}*/
+			le = labels_left[li];	//left element
+			re = labels_right[ri];
 
-
-		//very much open for interpretation and change
-		//score the partition scheme
-		//this uses a dynamically scalled bin size to define discrete probability distribution functions
-		//the distributions are built from the 'labels'
-
-		std::vector<double> leftDistribution, rightDistribution;
-		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
-		{
-			leftDistribution.push_back( 0.0 );
-			rightDistribution.push_back( 0.0 );
-		}
-
-		//build distributions
-		double l_dist_sum = 0.0;
-		double r_dist_sum = 0.0;
-		for(int i = 0; i < (int)leftSide.size(); i++)					//go through left side
-		{
-			double nextValue = leftSide[i].l;
-			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
-			leftDistribution[binIndex] += (1.0/(double)leftSide.size());	//for sum to 1 requirement
-		}
-
-		for(int i = 0; i < (int)rightSide.size(); i++)					//go through right side
-		{
-			double nextValue = rightSide[i].l;
-			int binIndex = floor( (nextValue - minimum_lab)/binSize );				//right???
-			rightDistribution[binIndex] += (1.0/(double)rightSide.size());	//for sum to 1 requirement
-		}
-
-		/*//check defined criteria
-		//for all i: (P(i)>0) -> (Q(i)>0)
-		bool zeroHeightRequirementSatisfied = true;
-		for(int binIndex = 0; zeroHeightRequirementSatisfied && (binIndex < desiredNumberOfBins); binIndex++)
-		{
-			bool atLeastOneZero = (leftDistribution[binIndex]*rightDistribution[binIndex] == 0.0);
-			bool bothZero = (leftDistribution[binIndex]+rightDistribution[binIndex] == 0.0);
-
-			if( atLeastOneZero && bothZero )
-				zeroHeightRequirementSatisfied = false;
-		}*/
-
-		/*printf("l_dist=[");
-		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
-			printf("%2.2f  ", leftDistribution[binIndex]);
-		printf("];\nr_dist=[");
-
-		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
-			printf("%2.2f  ", rightDistribution[binIndex]);
-		printf("];\n");
-		printf("\n");*/
-
-
-
-
-		/*if( zeroHeightRequirementSatisfied )
-		{
-			//sign issues???
-			double KB_1 = 0.0;
-			double KB_2 = 0.0;
-			for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
+			if( le < re )
 			{
-				double rat_1 = leftDistribution[binIndex] / rightDistribution[binIndex];
-				if( leftDistribution[binIndex] > 0.0 )
-					KB_1 += leftDistribution[binIndex] * (log(rat_1) / log(2.0));
-
-				double rat_2 = rightDistribution[binIndex] / leftDistribution[binIndex];
-				if( rat_2 > rightDistribution[binIndex] )
-					KB_2 += rightDistribution[binIndex] * (log(rat_2) / log(2.0));
-			}//END for(binIndex)
-
-			double thisSplitsScore = 0.5*(KB_1 + KB_2);
-
-			std::cout << "\t\tthisSplitsScore: " << thisSplitsScore << "\n" << std::flush;
-			//initilize or update 'bests'
-			if( (bestSplit_numberOnLeft == -1) || (thisSplitsScore > bestSplit_score) )
-			{
-				bestSplit_numberOnLeft = (int)leftSide.size();
-				bestSplit_score = thisSplitsScore;
+				sorted_labels.push_back( le );
+				belongs_to_left.push_back( true );
+				li++;
 			}
-		}//if( zeroHeightRequirementSatisfied )*/
 
+			else
+			{
+				sorted_labels.push_back( re );
+				belongs_to_left.push_back( false );
+				ri++;
+			}
+		}//END while(both have stuff to give)
 
-		int L_value = 2;	//restricted to int... its just cleaner to talk about
-		double distributionDistance = 0.0;
-		for(int binIndex = 0; binIndex < desiredNumberOfBins; binIndex++)
+		//only one of these while loops should execute
+		while( li < (int)labels_left.size() )
 		{
-			double dd = fabs( leftDistribution[binIndex] - rightDistribution[binIndex] );
-			distributionDistance += pow(dd, L_value);
+			le = labels_left[li];
+			sorted_labels.push_back( le );
+			belongs_to_left.push_back( true );
+			li++;
 		}
-		distributionDistance = pow(distributionDistance, (1.0/L_value));
 
-		//std::cout << "~~~ " << distributionDistance << " " << (int)leftSide.size() << " ";
-		//std::cout << distributionDistance << " ";
-
-		if( (bestSplit_numberOnLeft == -1) || (distributionDistance > bestSplit_score) )
+		while( ri < (int)labels_right.size() )
 		{
-			//std::cout << "***";
+			le = labels_right[ri];
+			sorted_labels.push_back( le );
+			belongs_to_left.push_back( false );
+			ri++;
+		}
+
+
+
+		for(int ind = 0; ind < (int)sorted_labels.size(); ind++)
+			ranks.push_back( ind+1 );
+
+		//break them ties...
+		int si = 0;	//sorted index
+		while( si < (int)ranks.size() )
+		{
+			int start_si = si;
+			double rankSum = ranks[si];
+			int countInvolved = 1;
+
+			while( (si+1 < (int)ranks.size()) && (sorted_labels[si] == sorted_labels[si+1]) )
+			{
+				rankSum += ranks[si+1];
+				si++;
+				countInvolved++;
+			}
+			
+			double avgRank = rankSum / countInvolved;
+			for(int ind = start_si; ind <= si; ind++)
+				ranks[ind] = avgRank;
+
+			si++;
+		}//END while( si still small )
+		
+
+		double sum_1 = 0.0;
+		double sum_2 = 0.0;
+		for(int ind = 0; ind < (int)ranks.size(); ind++)
+		{
+			if( belongs_to_left[ind] )
+				sum_1 += ranks[ind];
+
+			else
+				sum_2 += ranks[ind];
+		}
+
+		double n1 = (double)labels_left.size();
+		double U_1 = sum_1 - ((n1*n1 + n1) / 2);
+
+		double n2 = (double)labels_right.size();
+		double U_2 = sum_2 - ((n2*n2 + n2) / 2);
+
+		double sc = 1.0 / fabs(U_1*U_2);
+
+		if( sc > bestSplit_score )
+		{
+			bestSplit_score = sc;
 			bestSplit_numberOnLeft = (int)leftSide.size();
-			bestSplit_score = distributionDistance;
 		}
-		//std::cout << "\n";
+
 
 	}//END for(splitLocation)
-	//std::cout << "\n\n";
 
 
 	SplitPoint ret;
 	ret.score = bestSplit_score;
+	ret.featInd = featureIndex;
 
 
 	for(int vectorIndex = 0; vectorIndex < numberOfFeatureVectors; vectorIndex++)
