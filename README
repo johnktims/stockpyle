@@ -2,12 +2,8 @@
 getting a fresh copy:
 	git clone git@github.com:missionpilot/stockpyle
 
-
-build the database:
-	python build_db.py	#puts the csv symbols into the database
-	python get_data.py	#pulls down the histories of all the symbols
-
-
+installing required libraries
+	sudo apt-get install python-mysqldb
 
 ranks.py			#algorithm functions only
 
@@ -16,6 +12,3 @@ findRanks.py			#sorts the symbols based on potential
 
 score_a_ranking_algorithm.py	#gives a score for how well a particular 
 				#function predicts short term growth
-
-
-
