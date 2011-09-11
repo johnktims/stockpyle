@@ -31,7 +31,7 @@ def initialize_database():
     cur.execute('CREATE DATABASE `stockpyle`')
     cur.execute('USE `stockpyle`')
 
-    # Initialize tables
+    # Create tables
     cur.execute('''
         CREATE TABLE `symbols` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -270,6 +270,46 @@ def main():
 
     q.join()
     conn.commit()
+
+    # Create cache tables
+    #
+    # MySQL Views aren't cached and are really slow. This will have to be
+    # reconstructed daily by the update script.
+    cur = conn.cursor()
+    print 'Creating 30_day_window cache table'
+    cur.execute('''
+        CREATE TABLE `30_day_window`
+            SELECT `symbol`, `open`, `high`, `low`,
+                   `close`, `volume`, `date`
+            FROM `quotes`, `symbols`
+            WHERE `symbols`.`id`=`quotes`.`symbol_id` AND
+                  `date` > DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ORDER BY `date`
+    ''')
+
+    print 'Creating 60_day_window cache table'
+    cur.execute('''
+        CREATE TABLE `60_day_window`
+            SELECT `symbol`, `open`, `high`, `low`,
+                   `close`, `volume`, `date`
+            FROM `quotes`, `symbols`
+            WHERE `symbols`.`id`=`quotes`.`symbol_id` AND
+                  `date` > DATE_SUB(NOW(), INTERVAL 60 DAY)
+            ORDER BY `date`
+    ''')
+
+    print 'Creating 90_day_window cache table'
+    cur.execute('''
+        CREATE TABLE `90_day_window`
+            SELECT `symbol`, `open`, `high`, `low`,
+                   `close`, `volume`, `date`
+            FROM `quotes`, `symbols`
+            WHERE `symbols`.`id`=`quotes`.`symbol_id` AND
+                  `date` > DATE_SUB(NOW(), INTERVAL 90 DAY)
+            ORDER BY `date`
+    ''')
+    conn.commit()
+
 
 if __name__ == "__main__":
     main()
