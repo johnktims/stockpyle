@@ -4,7 +4,7 @@ getting a fresh copy:
 
 installing required libraries
 	sudo apt-get install python-mysqldb
-	sudo apt-get install libmysqlclient-dev
+	sudo apt-get install libmysql++-dev
 
 ranks.py			#algorithm functions only
 
