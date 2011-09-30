@@ -23,7 +23,7 @@ def initialize_database():
     conn = MySQLdb.connect(host=g_host,
                            user=g_user,
                            passwd=g_pass,
-                           port=5507)
+                           port=6612)
     cur = conn.cursor()
 
     # Create database
@@ -193,7 +193,7 @@ class download_history(threading.Thread):
                                     user=g_user,
                                     passwd=g_pass,
                                     db='stockpyle',
-                                    port=5507)
+                                    port=6612)
         self.q = q
         self.cursor = self.conn.cursor()
         self.sql = '''INSERT INTO `quotes`
@@ -249,7 +249,7 @@ def main():
                            user=g_user,
                            passwd=g_pass,
                            db="stockpyle",
-                           port=5507)
+                           port=6612)
     q = Queue.Queue()
 
     print 'Fetching symbols from Internet'
@@ -268,6 +268,7 @@ def main():
     for i in symbols:
         q.put(i)
 
+    print 'Joining threads'
     q.join()
     conn.commit()
 
@@ -275,40 +276,21 @@ def main():
     #
     # MySQL Views aren't cached and are really slow. This will have to be
     # reconstructed daily by the update script.
+    print 'Creating cache tables'
+    days = (30, 60, 90)
     cur = conn.cursor()
-    print 'Creating 30_day_window cache table'
-    cur.execute('''
-        CREATE TABLE `30_day_window`
-            SELECT `symbol`, `open`, `high`, `low`,
-                   `close`, `volume`, `date`
-            FROM `quotes`, `symbols`
-            WHERE `symbols`.`id`=`quotes`.`symbol_id` AND
-                  `date` > DATE_SUB(NOW(), INTERVAL 30 DAY)
-            ORDER BY `date`
-    ''')
 
-    print 'Creating 60_day_window cache table'
-    cur.execute('''
-        CREATE TABLE `60_day_window`
-            SELECT `symbol`, `open`, `high`, `low`,
-                   `close`, `volume`, `date`
-            FROM `quotes`, `symbols`
-            WHERE `symbols`.`id`=`quotes`.`symbol_id` AND
-                  `date` > DATE_SUB(NOW(), INTERVAL 60 DAY)
-            ORDER BY `date`
-    ''')
-
-    print 'Creating 90_day_window cache table'
-    cur.execute('''
-        CREATE TABLE `90_day_window`
-            SELECT `symbol`, `open`, `high`, `low`,
-                   `close`, `volume`, `date`
-            FROM `quotes`, `symbols`
-            WHERE `symbols`.`id`=`quotes`.`symbol_id` AND
-                  `date` > DATE_SUB(NOW(), INTERVAL 90 DAY)
-            ORDER BY `date`
-    ''')
-    conn.commit()
+    for day in days:
+        print 'Creating %d_day_window cache table' % day
+    
+        cur.execute('''
+            CREATE TABLE `%d_day_window`
+                SELECT *
+                FROM `quotes`
+                WHERE `date` > DATE_SUB(NOW(), INTERVAL %d DAY)
+                ORDER BY `date`
+        ''' % (day, day))
+        conn.commit()
 
 
 if __name__ == "__main__":
