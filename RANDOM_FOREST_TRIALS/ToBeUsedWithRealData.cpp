@@ -3,25 +3,18 @@
 //	g++ -o ToBeUsedWithRealData ToBeUsedWithRealData.cpp FeatureVector.cpp DataMatrix.cpp Node.cpp Tree.cpp Forest.cpp
 
 
+#include <iostream>
 #include "Forest.h"
 #include <limits.h>
+#include "DataStore.h"
 
 #define	TRAINING_RATIO		0.95
 #define	NUMBER_OF_TREES		1
 
 
 
-//used to generate toy data...
-//remove when using REAL data
-#define	NUMBER_OF_FEATURES		2
-#define	NUMBER_OF_FEATURE_VECTORS	1000
-
-
-
 DataMatrix full_dm;
 DataMatrix train_dm, test_dm;
-
-
 
 
 
@@ -34,38 +27,41 @@ double randomDouble( double min, double max )
 	return ret;
 }
 
-void buildDataMatrix()
+void buildDataMatrix(void)
 {
-	std::vector<double> feature_coefficients;
-	std::vector<double> feature_exponents;
+    DataStore ds;
 
-	for(int featureIndex = 0; featureIndex < NUMBER_OF_FEATURES; featureIndex++)
-	{
-		feature_coefficients.push_back( randomDouble(-3, +4) );
-		//feature_coefficients.push_back( 1.0 );
-		//feature_exponents.push_back( randomDouble(0, +2) );
-		feature_exponents.push_back( 1.0 );
-	}
+    Symbols symbols = ds.load_symbols();
 
+    /*
+    int x;
+    for(x = 0; x < symbols.size(); ++x)
+    {
+        std::cout << symbols[x].symbol << std::endl;
+    }
+    */
 
-	for(int vectorIndex = 0; vectorIndex < NUMBER_OF_FEATURE_VECTORS; vectorIndex++)
-	{
-		double label = 0.0;
+    Quotes quotes = ds.load_quotes(WIN_30);
 
-		FeatureVector fv;
-		for(int featureIndex = 0; featureIndex < NUMBER_OF_FEATURES; featureIndex++)
-		{
-			double newFeature = randomDouble( -2, +2 );
-			fv.addFeature( newFeature );
-			label += feature_coefficients[featureIndex] * pow(newFeature, feature_exponents[featureIndex]);
-		}//END for(featureIndex)
+    int x;
+    for(x = 1; x < quotes.size(); ++x)
+    {
+        if(symbols[quotes[x].symbol_id].sector == "Finance")
+        {
+            FeatureVector fv;
+            fv.addFeature(quotes[x].open);
+            fv.addFeature(quotes[x].high);
+            fv.addFeature(quotes[x].low);
+            fv.addFeature(quotes[x].close);
+            fv.addFeature(quotes[x].volume);
 
-		fv.setLabel( label );
+            fv.setLabel(randomDouble(-5, 5));
 
-		full_dm.addFeatureVector( fv );
-	}//END for(vectorIndex)
+            full_dm.addFeatureVector(fv);
+        }
+    }
+
 }
-
 
 
 int main(int argc, char* argv[] )
@@ -76,16 +72,9 @@ int main(int argc, char* argv[] )
 	buildDataMatrix();
 
 
-
-
-
-
-
-
-
-
-
 	int numberOfVectors = full_dm.vectorCount();
+    std::cout << "DataMatrix contains " << numberOfVectors << " vectors." << std::endl;
+    
 
 
 	//build training and testing data matricies
