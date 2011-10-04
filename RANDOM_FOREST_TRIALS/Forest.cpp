@@ -23,9 +23,13 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 		DataMatrix dm_toUse;
 		std::vector<int> indexesToAdd;
 
+
+		//if not using bootstrapping... it is unnecessary to create another data matrix ("dm_toUse"
+		//	... but then the tree::presentTrainingData function only needs to be written once, 
+		//	... making it cleaner to change
 		#if USE_BOOTSTRAPPING == 0
 		//dm_toUse = dm;	//copy correctly??? or do i need to add them all??
-		for(int exampleIndex = 0; exampleIndex < dm.vectorCount(); exampleIndex++)
+		for(int exampleIndex = 0; exampleIndex < dm_passed.vectorCount(); exampleIndex++)
 			indexesToAdd.push_back( exampleIndex );
 		#endif
 

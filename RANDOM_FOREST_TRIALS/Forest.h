@@ -15,9 +15,13 @@
 
 #define	DEFAULT_TREE_COUNT	50
 
-#define	USE_BOOTSTRAPPING	1
-#define	BOOTSTRAP_RATIO		(0.6)
-#define	USE_REPLACEMENT		1
+//#define	USE_BOOTSTRAPPING	1
+//#define	BOOTSTRAP_RATIO		(0.6)
+//#define	USE_REPLACEMENT		1
+
+#define	USE_BOOTSTRAPPING	0
+#define	BOOTSTRAP_RATIO		(0.6)	//if USE_BOOTSTRAPPING==0 ... then this does not matter
+#define	USE_REPLACEMENT		1	//if USE_BOOTSTRAPPING==0 ... then this does not matter
 
 
 class Forest
