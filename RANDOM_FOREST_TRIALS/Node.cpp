@@ -109,6 +109,7 @@ bool Node::isPure( DataMatrix dm )
 {
 	int numberOfFeatureVectors = dm.vectorCount();
 
+
 	//if( numberOfFeatureVectors <= MINIMUM_NUMBER_OF_VECTORS )
 	//	return true;
 

@@ -55,6 +55,9 @@ void Forest::presentTrainingData( DataMatrix dm_passed, int ss )
 
 		for(int iii = 0; iii < (int)indexesToAdd.size(); iii++)
 			dm_toUse.addFeatureVector( dm_passed.getFeatureVector( indexesToAdd[iii] ) );
+
+		//std::cout << "dm_passed.vectorCount(): " << dm_passed.vectorCount() << "\n\n";
+		//std::cout << "dm_toUse.vectorCount(): " << dm_toUse.vectorCount() << "\n\n";
 		////////////////////////////////////////////////////////////////////////////////
 
 

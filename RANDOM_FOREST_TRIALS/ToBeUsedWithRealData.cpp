@@ -8,7 +8,7 @@
 #include <limits.h>
 #include "DataStore.h"
 
-#define	TRAINING_RATIO		0.95
+#define	TRAINING_RATIO		0.99
 #define	NUMBER_OF_TREES		1
 
 
@@ -32,12 +32,20 @@ double randomDouble( double min, double max )
 
 void buildCompanyVector()
 {
-	companiesOfInterest.push_back( (std::string)("Nasdaq:CSCO") );
-	companiesOfInterest.push_back( (std::string)("NYSE:JNPR") );
-	companiesOfInterest.push_back( (std::string)("NYSE:HPQ") );
-	companiesOfInterest.push_back( (std::string)("Nasdaq:MSFT") );
-	companiesOfInterest.push_back( (std::string)("Nasdaq:GOOG") );
-	companiesOfInterest.push_back( (std::string)("Nasdaq:YHOO") );
+	companiesOfInterest.clear();
+	//companiesOfInterest.push_back( (std::string)("Nasdaq:CSCO") );
+	//companiesOfInterest.push_back( (std::string)("NYSE:JNPR") );
+	//companiesOfInterest.push_back( (std::string)("NYSE:HPQ") );
+	//companiesOfInterest.push_back( (std::string)("Nasdaq:MSFT") );
+	//companiesOfInterest.push_back( (std::string)("Nasdaq:GOOG") );
+	//companiesOfInterest.push_back( (std::string)("Nasdaq:YHOO") );
+
+	companiesOfInterest.push_back( (std::string)("CSCO") );
+	companiesOfInterest.push_back( (std::string)("JNPR") );
+	companiesOfInterest.push_back( (std::string)("HPQ") );
+	companiesOfInterest.push_back( (std::string)("MSFT") );
+	companiesOfInterest.push_back( (std::string)("GOOG") );
+	companiesOfInterest.push_back( (std::string)("YHOO") );
 }
 
 void buildDataMatrix(void)
@@ -47,24 +55,6 @@ void buildDataMatrix(void)
 	Symbols symbols = ds.load_symbols();
 
 	Quotes quotes = ds.load_quotes(WIN_90);
-
-	/*int x;
-	for(x = 1; x < quotes.size(); ++x)
-	{
-		if(symbols[quotes[x].symbol_id].sector == "Finance")
-		{
-		FeatureVector fv;
-		fv.addFeature(quotes[x].open);
-		fv.addFeature(quotes[x].high);
-		fv.addFeature(quotes[x].low);
-		fv.addFeature(quotes[x].close);
-		fv.addFeature(quotes[x].volume);
-
-		fv.setLabel(randomDouble(-5, 5));
-
-		full_dm.addFeatureVector(fv);
-		}
-	}*/
 
 
 	std::vector<Quote> dummy;
@@ -85,7 +75,6 @@ void buildDataMatrix(void)
 
 		if( symbolSelectIndex != -1 )
 		{
-			//std::cout << quotes[x].high << "\n" << std::flush;
 			(extractedData[symbolSelectIndex]).push_back( quotes[x] );
 		}
 	}//END for(x)
@@ -97,13 +86,11 @@ void buildDataMatrix(void)
 	{
 		for(int i = startTailSize; i < (int)extractedData[symbolIndex].size()-endTailSize; i++)
 		{
-			//std::cout << symbols[ extractedData[symbolIndex][i].symbol_id ].symbol << " ";
-
 			FeatureVector fv;
 
 			//includes current day...
 			//run after market close
-			for(int daysBack = 0; daysBack < startTailSize; daysBack++)
+			for(int daysBack = 0; daysBack <= startTailSize; daysBack++)
 			{
 				Quote today = extractedData[symbolIndex][i-daysBack];
 
@@ -117,22 +104,26 @@ void buildDataMatrix(void)
 			}
 
 			//assume a market buy at the next day's open price
-			//double minGain = 0.0;
-			double averageMidPoint = 0.0;
-			int pointsCointed = 0;
+			//label with the average percentage up of the middle values			
+			double label = 0.0;
+			int pointsCounted = 0;
+			double nextDayOpen = extractedData[symbolIndex][i+1].open;	//the earliest you can buy in
 			for(int daysAhead = 1; daysAhead <= endTailSize; daysAhead++)
 			{
 				Quote today = extractedData[symbolIndex][i+daysAhead];
 				//double gain = today.low / extractedData[symbolIndex][i+1].open;
-				double mid = today.low + (today.high - today.low);
-				averageMidPoint += mid;
-				pointsCointed++;
+				double mid = today.low + ((today.high - today.low)/2.0);
+				//label += ((mid - nextDayOpen)/nextDayOpen);	//percentage up from buy in
+				label += (mid/nextDayOpen) - 1.0;	//percentage up from buy in
+				pointsCounted++;
 			}
-			averageMidPoint /= pointsCointed;
+			label /= pointsCounted;
 
-			fv.setLabel( averageMidPoint );
+			fv.setLabel( label );
+
+			full_dm.addFeatureVector( fv );
 		}
-		std::cout << "\n\n";
+
 	}//END for(symbolIndex)
 
 }
@@ -149,7 +140,7 @@ int main(int argc, char* argv[] )
 
 
 	int numberOfVectors = full_dm.vectorCount();
-    std::cout << "DataMatrix contains " << numberOfVectors << " vectors." << std::endl;
+	std::cout << "DataMatrix contains " << numberOfVectors << " vectors." << std::endl;
     
 
 
