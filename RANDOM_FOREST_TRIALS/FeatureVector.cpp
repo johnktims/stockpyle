@@ -42,8 +42,46 @@ double FeatureVector::getFeature( int index )
 	}
 }
 
+void FeatureVector::incrementFeature( int index, double value )
+{
+	if( (index < 0) || (index >= (int)fv.size()) )
+	{
+		std::cout << "FeatureVector::incrementFeature() ~~~ INDEX OUT OF BOUNDS...\n\n" << std::flush;
+	}
+
+	else
+	{
+		fv[index] += value;
+	}
+}
+
+void FeatureVector::multiplyFeature( int index, double value )
+{
+	if( (index < 0) || (index >= (int)fv.size()) )
+	{
+		std::cout << "FeatureVector::multiplyFeature() ~~~ INDEX OUT OF BOUNDS...\n\n" << std::flush;
+	}
+
+	else
+	{
+		fv[index] *= value;
+	}
+}
+
 int FeatureVector::featureCount()
 {
 	return (int)fv.size();
 }
+
+void FeatureVector::printVector()
+{
+	std::cout << "{";
+	for(int i = 0; i < (int)fv.size(); i++)
+		std::cout << fv[i] << " ";
+	std::cout << "}";
+}
+
+
+
+
 

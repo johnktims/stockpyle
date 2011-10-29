@@ -19,7 +19,12 @@ class FeatureVector
 		void addFeature( double value );
 		double getFeature( int index );
 
+		void incrementFeature( int index, double value );
+		void multiplyFeature( int index, double value );
+
 		int featureCount();
+
+		void printVector();
 
 
 	private:

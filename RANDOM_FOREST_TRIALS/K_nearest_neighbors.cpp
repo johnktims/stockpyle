@@ -28,6 +28,8 @@ struct DoubleSet
 	std::vector<double> v;
 };
 
+
+
 bool customerSorter(DoubleSet const& lhs, DoubleSet const& rhs)
 {
 	return (lhs.v)[0] < (rhs.v)[0];
@@ -57,10 +59,10 @@ void buildCompanyVector()
 
 	companiesOfInterest.push_back( (std::string)("CSCO") );
 	companiesOfInterest.push_back( (std::string)("JNPR") );
-	companiesOfInterest.push_back( (std::string)("HPQ") );
-	companiesOfInterest.push_back( (std::string)("MSFT") );
-	companiesOfInterest.push_back( (std::string)("GOOG") );
-	companiesOfInterest.push_back( (std::string)("YHOO") );
+	//companiesOfInterest.push_back( (std::string)("HPQ") );
+	//companiesOfInterest.push_back( (std::string)("MSFT") );
+	//companiesOfInterest.push_back( (std::string)("GOOG") );
+	//companiesOfInterest.push_back( (std::string)("YHOO") );
 }
 
 void buildDataMatrix(void)
@@ -105,6 +107,7 @@ void buildDataMatrix(void)
 
 			//includes current day...
 			//run after market close
+			//std::cout << "full_dm.vectorCount(): " << full_dm.vectorCount() << "\n";
 			for(int daysBack = 0; daysBack <= startTailSize; daysBack++)
 			{
 				Quote today = extractedData[symbolIndex][i-daysBack];
@@ -116,25 +119,48 @@ void buildDataMatrix(void)
 				fv.addFeature( today.high / today.close );
 				fv.addFeature( today.low / today.close );
 				fv.addFeature( (today.high - today.low) / today.close );
+
+				//if( full_dm.vectorCount() == 346 )
+				//{
+				//	std::cout << "open: " << today.open << "\n";
+				//	std::cout << "close: " << today.close << "\n";
+				//	std::cout << "high: " << today.high << "\n";
+				//	std::cout << "low: " << today.low << "\n";
+				//	std::cout << "\t\t\t\t" << "(today.close / today.open): " << (today.close / today.open) << "\n";
+				//	std::cout << "\t\t\t\t" << "(today.high / today.open): " << (today.high / today.open) << "\n";
+				//	std::cout << "\t\t\t\t" << "(today.low / today.open): " << (today.low / today.open) << "\n";
+				//}
 			}
 
 			//assume a market buy at the next day's open price
 			//label with the average percentage up of the middle values			
-			double label = 0.0;
-			int pointsCounted = 0;
-			double nextDayOpen = extractedData[symbolIndex][i+1].open;	//the earliest you can buy in
-			for(int daysAhead = 1; daysAhead <= endTailSize; daysAhead++)
-			{
-				Quote today = extractedData[symbolIndex][i+daysAhead];
-				//double gain = today.low / extractedData[symbolIndex][i+1].open;
-				double mid = today.low + ((today.high - today.low)/2.0);
-				//label += ((mid - nextDayOpen)/nextDayOpen);	//percentage up from buy in
-				label += (mid/nextDayOpen) - 1.0;	//percentage up from buy in
-				pointsCounted++;
-			}
-			label /= pointsCounted;
+			//double label = 0.0;
+			//int pointsCounted = 0;
+			//double nextDayOpen = extractedData[symbolIndex][i+1].open;	//the earliest you can buy in
+			//for(int daysAhead = 1; daysAhead <= endTailSize; daysAhead++)
+			//{
+			//	Quote today = extractedData[symbolIndex][i+daysAhead];
+			//	//double gain = today.low / extractedData[symbolIndex][i+1].open;
+			//	double mid = today.low + ((today.high - today.low)/2.0);
+			//	//label += ((mid - nextDayOpen)/nextDayOpen);	//percentage up from buy in
+			//	label += (mid/nextDayOpen) - 1.0;	//percentage up from buy in
+			//	pointsCounted++;
+			//}
+			//label /= pointsCounted;
+			//fv.setLabel( label );
 
+			Quote tomorrow = extractedData[symbolIndex][i+1];
+			double label = (tomorrow.close - tomorrow.open) / tomorrow.open;
+			//double label = tomorrow.high / tomorrow.open;
 			fv.setLabel( label );
+
+
+			//if( full_dm.vectorCount() == 346 )
+			//{
+			//	std::cout << "####\n";
+			//	fv.printVector();
+			//	std::cout << "\n\n";
+			//}
 
 			full_dm.addFeatureVector( fv );
 		}
@@ -181,20 +207,73 @@ int main(int argc, char* argv[] )
 
 
 	//build training and testing data matricies
+	std::vector<int> trainingIndexesBackIntoFull;
+	std::vector<int> testingIndexesBackIntoFull;
 	for(int vectorIndex = 0; vectorIndex < numberOfVectors; vectorIndex++)
 	{
 		double randVal = randomDouble(0.0, 1.0);
 
 		if( randVal < TRAINING_RATIO )
+		{
 			train_dm.addFeatureVector( full_dm.getFeatureVector(vectorIndex) );
+			trainingIndexesBackIntoFull.push_back( vectorIndex );
+		}
 
 		else
+		{
 			test_dm.addFeatureVector( full_dm.getFeatureVector(vectorIndex) );
+			testingIndexesBackIntoFull.push_back( vectorIndex );
+		}
+
+		//std::cout << vectorIndex << "\n";
+		//(full_dm.getFeatureVector(vectorIndex)).printVector();
+		//std::cout << "\n\n";
 	}
 	int numberOfTrainingVectors = train_dm.vectorCount();
 	int numberOfTestingVectors = test_dm.vectorCount();
 
 
+
+
+
+	int dimensionality = train_dm.getDimensionality();
+	FeatureVector meanVector, expectedSquare, varianceVector;
+	for(int di = 0; di < dimensionality; di++)
+	{
+		meanVector.addFeature( 0.0 );
+		expectedSquare.addFeature( 0.0 );
+		//varianceVector.addFeature( 0.0 );
+	}//END for(di)
+
+
+	for(int trainingIndex = 0; trainingIndex < numberOfTrainingVectors; trainingIndex++)
+	{
+		FeatureVector trainingVector = train_dm.getFeatureVector( trainingIndex );
+
+		for(int di = 0; di < dimensionality; di++)
+		{
+			double v = trainingVector.getFeature(di);
+			//meanVector.incrementFeature( di, (v / numberOfTrainingVectors) );
+			//expectedSquare.incrementFeature( di, ((v*v) / numberOfTrainingVectors) );
+			meanVector.incrementFeature( di, v );
+			expectedSquare.incrementFeature( di, v*v );
+		}
+	}//END for(trainingIndex)
+
+	for(int di = 0; di < dimensionality; di++)
+	{
+		meanVector.multiplyFeature( di, (1.0/numberOfTrainingVectors) );
+		expectedSquare.multiplyFeature( di, (1.0/numberOfTrainingVectors) );
+
+		double e_x2 = expectedSquare.getFeature(di);
+		double ex_2 = meanVector.getFeature(di);
+		varianceVector.addFeature( e_x2 - (ex_2*ex_2) );
+	}//END for di
+
+
+
+
+	/*
 	std::vector<DoubleSet> results;
 	for(int testingIndex = 0; testingIndex < numberOfTestingVectors; testingIndex++)
 	{
@@ -235,7 +314,92 @@ int main(int argc, char* argv[] )
 		std::cout << (results[ii]).v[1] << "\t";
 		std::cout << (results[ii]).v[2] << "\t";
 		std::cout << "\n\n";
-	}
+	}*/
+
+
+	for(int testingIndex = 0; testingIndex < numberOfTestingVectors; testingIndex++)
+	{
+		FeatureVector testVector = test_dm.getFeatureVector( testingIndex );
+
+		std::vector<DoubleSet> aSet;
+		for(int trainingIndex = 0; trainingIndex < numberOfTrainingVectors; trainingIndex++)
+		{
+			FeatureVector trainVector = train_dm.getFeatureVector(trainingIndex);
+
+			double distance = 0.0;
+			for(int di = 0; di < dimensionality; di++)
+			{
+				double meanVal = meanVector.getFeature(di);
+				double stDevVal = sqrt( varianceVector.getFeature(di) );
+
+
+				//could make this arithmetic simplified...
+				double v1 = testVector.getFeature(di);
+				v1 = (v1 - meanVal) / stDevVal;
+				double v2 = trainVector.getFeature(di);
+				v2 = (v2 - meanVal) / stDevVal;
+
+				double diff = v1 - v2;
+				diff *= diff;
+				distance += diff;
+			}//END for(di)
+
+			//std::cout << testingIndexesBackIntoFull[testingIndex] << ": ";
+			//trainVector.printVector();
+			//std::cout << "\n";
+			//std::cout << trainingIndexesBackIntoFull[trainingIndex] << ": ";
+			//testVector.printVector();
+			//std::cout << "\n";
+			//std::cout << "distance: " << distance << "\n\n";
+
+
+			DoubleSet structDS;
+			(structDS.v).push_back( distance );
+			(structDS.v).push_back( trainVector.getLabel() );
+			aSet.push_back( structDS );
+		}//END trainingIndex
+
+		std::sort( aSet.begin(), aSet.end(), &customerSorter );
+
+
+
+
+		//could make number of neighbors considdered dynamic, with respect to:
+		//	max and min distances included
+		//	variance among distances
+		//	variance among associated labels
+		
+		std::cout << "actual label: " << testVector.getLabel() << "\n";
+
+		int numberOfNeighbors = 5;
+		double summedDistance = 0.0;
+		double maxDistance = -1.0;
+		for(int i = 0; i < numberOfNeighbors; i++)
+		{
+			summedDistance += aSet[i].v[0];
+
+			if( aSet[i].v[0] > maxDistance )
+				maxDistance = aSet[i].v[0];
+		}
+
+		double averagedLabel = 0.0;
+		for(int i = 0; i < numberOfNeighbors; i++)
+		{
+			double dist = aSet[i].v[0];
+			double weight = (1.0 - (dist/summedDistance)) / (numberOfNeighbors-1.0);
+			double lab = aSet[i].v[1];
+
+			std::cout << "\tpredicted: (" << dist << "," << weight << ") " << lab << "\n";
+			averagedLabel += weight * lab;
+		}
+
+		std::cout << "\tCONFIDENCE: " << summedDistance << " " << maxDistance << "\n";
+		std::cout << "\tAVERAGED: " << averagedLabel << "\n";
+
+		std::cout << "\n\n\n";
+
+	}//END for(testingIndex)
+
 
 }//END main()
 
